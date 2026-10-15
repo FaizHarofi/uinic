@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ShieldAlert, CheckCircle2, AlertOctagon, ArrowLeft, Sparkles, HelpCircle, FileCode } from 'lucide-react';
+import { ShieldAlert, CheckCircle2, ArrowLeft, HelpCircle, FileCode, Package, Search, X } from 'lucide-react';
 import { RedFlag } from '../types/game';
+import { Mascot } from './Mascot';
 import { playBuzz, playClick, playEvidenceFound } from '../utils/sound';
 
 interface InspectModalProps {
@@ -44,144 +45,143 @@ export const InspectModal: React.FC<InspectModalProps> = ({
     }, 2500);
   };
 
+  const targetState = (flagId: string, base: string) => {
+    const found = redFlags.find((f) => f.id === flagId)?.isFound;
+    return found
+      ? `${base} border border-[#168C87] bg-[#168C87]/15`
+      : `${base} border border-dashed border-[#F0C75E] hover:bg-[#F0C75E]/10 cursor-pointer`;
+  };
+
   return (
-    <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-      <div className="relative w-full max-w-5xl bg-slate-900 border-4 border-amber-400 rounded-3xl shadow-[0_0_50px_rgba(245,158,11,0.3)] overflow-hidden flex flex-col max-h-[92vh]">
-        
-        {/* Header Inspeksi Komik */}
-        <div className="bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-3.5 flex items-center justify-between border-b-4 border-black text-slate-950">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-black text-amber-400 rounded-lg border-2 border-black -rotate-3">
-              <ShieldAlert className="w-6 h-6 stroke-[2.5]" />
-            </div>
-            <div>
-              <h2 className="text-xl md:text-2xl font-black uppercase tracking-wide flex items-center gap-2">
-                MODE INVESTIGASI: SPOT THE RED FLAGS!
-              </h2>
-              <p className="text-xs md:text-sm font-bold text-slate-900">
-                Klik bagian-bagian chat yang mencurigakan di layar HP Ibu untuk mengumpulkan bukti!
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(14,22,38,0.6)] p-4 backdrop-blur-sm">
+      <div className="relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-[14px] border border-[var(--line-strong)] bg-[var(--white)] shadow-[0_24px_70px_rgba(14,22,38,0.35)]">
+
+        {/* Header inspeksi */}
+        <div className="flex items-center justify-between gap-4 border-b border-[var(--line)] px-5 py-3.5 md:px-6">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="icon-tile !bg-[var(--red-tint)] !text-[var(--red-deep)] shrink-0">
+              <ShieldAlert size={20} />
+            </span>
+            <div className="min-w-0">
+              <h2 className="text-[1.1rem] font-bold leading-tight md:text-[1.25rem]">Periksa layar chat Ibu</h2>
+              <p className="truncate text-[0.8rem] text-[var(--ink-muted)]">
+                Klik bagian pesan yang mencurigakan untuk mengumpulkan bukti.
               </p>
             </div>
           </div>
-
-          <div className="flex items-center gap-3">
-            {/* Counter */}
-            <div className="bg-black text-white px-3.5 py-1.5 rounded-xl border-2 border-black font-black text-sm flex items-center gap-2">
-              <span>BUKTI DITEMUKAN:</span>
-              <span className="text-amber-400 text-base">{foundCount} / 3</span>
-            </div>
-          </div>
+          <span className={`chip shrink-0 ${foundCount === redFlags.length ? 'chip-teal' : 'chip-yellow'}`}>
+            Bukti {foundCount}/{redFlags.length}
+          </span>
         </div>
 
-        {/* Content Area: Split View (Layar Chat WhatsApp di Kiri, Penjelasan Bukti di Kanan) */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 overflow-y-auto bg-slate-950/70">
-          
-          {/* SISI KIRI: Simulasi Layar WhatsApp HP Ibu (7 Kolom) */}
-          <div className="lg:col-span-7 flex flex-col items-center">
-            <div className="w-full max-w-md bg-[#0b141a] rounded-3xl border-4 border-slate-700 shadow-2xl overflow-hidden flex flex-col">
-              
-              {/* WhatsApp App Bar */}
+        {/* Split view: layar chat (gelap, otentik) + panel analisis (terang) */}
+        <div className="grid flex-1 grid-cols-1 gap-5 overflow-y-auto bg-[var(--mist)] p-4 md:p-6 lg:grid-cols-12">
+
+          {/* SISI KIRI: simulasi layar WhatsApp */}
+          <div className="lg:col-span-7">
+            <div className="mx-auto flex w-full max-w-md flex-col overflow-hidden rounded-[14px] border border-[#2a3942] shadow-[0_14px_40px_rgba(14,22,38,0.3)]">
+
+              {/* WhatsApp app bar */}
               <div
                 onClick={() => handleInspectTarget('flag-sender')}
-                className={`px-4 py-3 bg-[#202c33] flex items-center justify-between border-b border-slate-700 cursor-pointer transition-all ${
-                  redFlags.find((f) => f.id === 'flag-sender')?.isFound
-                    ? 'ring-4 ring-emerald-500/80 bg-emerald-950/30'
-                    : 'hover:bg-slate-700/50'
-                }`}
+                className={`flex items-center justify-between gap-3 bg-[#202c33] px-4 py-3 transition-colors ${targetState('flag-sender', '')}`}
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-slate-600 flex items-center justify-center font-bold text-white text-sm">
-                    📦
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#3b4a54]">
+                    <Package size={18} className="text-[#cfd8dc]" />
                   </div>
-                  <div>
-                    <div className="flex items-center gap-1.5 text-slate-100 font-bold text-sm">
-                      Kurir J&T Express (Gudang)
-                      <span className="text-[10px] text-amber-400 font-normal border border-amber-400/40 rounded px-1">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5 text-sm font-bold text-[#e9edef]">
+                      <span className="truncate">Kurir J&amp;T Express (Gudang)</span>
+                      <span className="shrink-0 rounded border border-[#8696a0]/50 px-1 text-[9px] font-normal text-[#8696a0]">
                         Bukan Akun Resmi
                       </span>
                     </div>
-                    <div className="text-xs text-slate-400 font-mono">+62 895-3342-9912</div>
+                    <div className="font-mono text-xs text-[#8696a0]">+62 895-3342-9912</div>
                   </div>
                 </div>
 
                 {redFlags.find((f) => f.id === 'flag-sender')?.isFound && (
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                  <CheckCircle2 size={19} className="shrink-0 text-[#168C87]" />
                 )}
               </div>
 
-              {/* Chat Message Bubble Canvas */}
-              <div className="p-4 space-y-4 bg-[#0c1317] min-h-[380px] flex flex-col justify-end text-sm">
-                
-                {/* Bubble Chat dari Penipu */}
-                <div className="bg-[#202c33] text-slate-100 rounded-2xl rounded-tl-none p-3.5 max-w-[90%] border border-slate-700/80 shadow-md space-y-2.5">
+              {/* Canvas bubble chat */}
+              <div
+                onClick={() => handleMisclick('Area itu tidak mengandung bukti — periksa bagian lain dari pesan.')}
+                className="flex min-h-[340px] flex-col justify-end space-y-4 bg-[#0b141a] p-4 text-sm"
+              >
+
+                <div className="max-w-[92%] space-y-2.5 rounded-lg rounded-tl-none border border-[#2a3942] bg-[#202c33] p-3.5 text-[#e9edef]">
                   <p>
-                    Selamat malam Ibu. Kami dari pihak ekspedisi menginfokan bahwa paket atas nama Ibu tertahan di gudang karena alamat kurang lengkap.
+                    Selamat malam Ibu. Kami dari pihak ekspedisi menginfokan bahwa paket atas nama Ibu
+                    tertahan di gudang karena alamat kurang lengkap.
                   </p>
 
-                  {/* TARGET RED FLAG 2: Urgensi Panik */}
+                  {/* Target: urgensi panik */}
                   <div
-                    onClick={() => handleInspectTarget('flag-urgency')}
-                    className={`p-2 rounded-lg cursor-pointer transition-all ${
-                      redFlags.find((f) => f.id === 'flag-urgency')?.isFound
-                        ? 'bg-emerald-950/50 border-2 border-emerald-500 text-emerald-200'
-                        : 'bg-rose-950/30 hover:bg-rose-900/40 border-2 border-dashed border-rose-500/60 text-rose-300'
-                    }`}
+                    onClick={(e) => { e.stopPropagation(); handleInspectTarget('flag-urgency'); }}
+                    className={targetState('flag-urgency', 'rounded-lg p-2')}
                   >
-                    <p className="font-bold flex items-center gap-1.5">
-                      <AlertOctagon className="w-4 h-4 text-rose-400 shrink-0" />
-                      "MOHON SEGERA DIBUKA DALAM 10 MENIT ATAU PAKET AKAN DIKEMBALIKAN KE PENJUAL!"
+                    <p className="flex items-start gap-1.5 font-bold">
+                      <span className="mt-0.5 shrink-0 text-[#f0c75e]">&#9888;</span>
+                      &ldquo;MOHON SEGERA DIBUKA DALAM 10 MENIT ATAU PAKET AKAN DIKEMBALIKAN KE PENJUAL!&rdquo;
                     </p>
-                    <div className="text-[10px] text-slate-400 mt-0.5">
+                    <div className="mt-1 text-[10px] text-[#8696a0]">
                       {redFlags.find((f) => f.id === 'flag-urgency')?.isFound
-                        ? '✓ Terbukti Manipulasi Panik'
-                        : '🔍 Klik untuk periksa kalimat ini'}
+                        ? 'Ditemukan: manipulasi tekanan waktu'
+                        : 'Klik untuk memeriksa kalimat ini'}
                     </div>
                   </div>
 
-                  <p className="text-xs text-slate-300">
+                  <p className="text-xs text-[#aebac1]">
                     Silakan unduh dan instal bukti foto resi paket di bawah ini:
                   </p>
 
-                  {/* TARGET RED FLAG 1 (UTAMA): File APK Penyamaran */}
+                  {/* Target: file APK */}
                   <div
-                    onClick={() => handleInspectTarget('flag-ext')}
-                    className={`rounded-xl p-3 cursor-pointer transition-all ${
+                    onClick={(e) => { e.stopPropagation(); handleInspectTarget('flag-ext'); }}
+                    className={`rounded-lg p-3 transition-colors ${
                       redFlags.find((f) => f.id === 'flag-ext')?.isFound
-                        ? 'bg-emerald-950/60 border-2 border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
-                        : 'bg-slate-900 hover:bg-slate-800 border-2 border-dashed border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
+                        ? 'border border-[#168C87] bg-[#168C87]/15'
+                        : 'cursor-pointer border border-dashed border-[#F0C75E] bg-[#161f27] hover:bg-[#20292f]'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-2.5 bg-rose-600 rounded-lg text-white font-black text-xs flex flex-col items-center">
-                        <FileCode className="w-6 h-6" />
+                      <div className="flex flex-col items-center rounded bg-[#3b2a2a] px-2 py-1.5 text-[10px] font-bold text-[#e57373]">
+                        <FileCode size={17} />
                         <span>APK</span>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-mono text-xs font-black truncate text-amber-300 flex items-center gap-1">
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate font-mono text-xs font-semibold text-[#e9edef]">
                           Lihat_Foto_Paket.pdf.apk
                         </div>
-                        <div className="text-[11px] text-slate-400">Ukuran: 8.4 MB • File Instalasi Android</div>
+                        <div className="text-[11px] text-[#8696a0]">Ukuran: 8,4 MB • File Instalasi Android</div>
                       </div>
                     </div>
 
-                    <div className="mt-2 text-center py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-lg text-xs flex items-center justify-center gap-1.5">
+                    <div className="mt-2 flex items-center justify-center gap-1.5 rounded bg-[#161f27] px-2 py-1.5 text-[11px] font-semibold">
                       {redFlags.find((f) => f.id === 'flag-ext')?.isFound ? (
                         <>
-                          <CheckCircle2 className="w-4 h-4 text-emerald-950" />
-                          <span>BAHAYA TERBONGKAR: INI APLIKASI MALWARE!</span>
+                          <CheckCircle2 size={13} className="text-[#168C87]" />
+                          <span className="text-[#4dd0c7]">Terverifikasi: ini file instalasi, bukan foto</span>
                         </>
                       ) : (
-                        <span>🔍 KLIK FILE INI UNTUK MEMERIKSA FORMATNYA</span>
+                        <>
+                          <Search size={13} className="text-[#f0c75e]" />
+                          <span className="text-[#8696a0]">Klik file ini untuk memeriksa formatnya</span>
+                        </>
                       )}
                     </div>
                   </div>
 
-                  <div className="text-[10px] text-slate-400 text-right">20:14 WIB</div>
+                  <div className="text-right font-mono text-[10px] text-[#8696a0]">20:14 WIB</div>
                 </div>
 
                 {/* Feedback saat salah klik area lain */}
                 {missMessage && (
-                  <div className="bg-rose-900/90 text-white text-xs px-3 py-1.5 rounded-lg border border-rose-500 animate-shake text-center">
+                  <div className="animate-shake flex items-center justify-center gap-2 rounded-lg border border-[#D94B4B] bg-[#2a1616] px-3 py-2 text-center text-xs font-semibold text-[#f2b8b5]">
+                    <X size={14} className="shrink-0" />
                     {missMessage}
                   </div>
                 )}
@@ -189,96 +189,85 @@ export const InspectModal: React.FC<InspectModalProps> = ({
             </div>
           </div>
 
-          {/* SISI KANAN: Panel Hasil Analisis Detektif (5 Kolom) */}
-          <div className="lg:col-span-5 flex flex-col justify-between space-y-4">
-            
-            {/* Penjelasan Bukti Aktif */}
-            <div className="bg-slate-900 border-2 border-slate-700 rounded-2xl p-5 shadow-lg flex-1">
-              <h3 className="text-sm font-bold text-amber-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                <Sparkles className="w-4 h-4" />
-                Catatan Analisis Bukti
+          {/* SISI KANAN: panel analisis */}
+          <div className="flex flex-col justify-between space-y-4 lg:col-span-5">
+
+            {/* Penjelasan bukti aktif */}
+            <div className="card flex-1 p-5">
+              <h3 className="mb-3 flex items-center gap-2 text-[0.95rem] font-bold text-[var(--ink)]">
+                Catatan analisis bukti
               </h3>
 
               {activeExplanation ? (
-                <div className="space-y-3 animate-in fade-in duration-200">
-                  <div className="p-3 bg-emerald-950/40 border border-emerald-500/60 rounded-xl">
-                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-wide">
-                      {activeExplanation.name}
-                    </span>
-                    <p className="text-sm font-bold text-white mt-1">
-                      {activeExplanation.description}
-                    </p>
+                <div className="fade-slide-up space-y-3">
+                  <div className="panel-tint p-3.5">
+                    <span className="text-[0.75rem] font-bold text-[#6d5410]">{activeExplanation.name}</span>
+                    <p className="mt-1 text-sm font-bold text-[var(--ink)]">{activeExplanation.description}</p>
                   </div>
-                  
-                  <div className="text-xs text-slate-300 leading-relaxed bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-                    <span className="font-bold text-amber-300 block mb-1">Kenapa Ini Bahaya?</span>
+
+                  <div className="rounded-[8px] border border-[var(--line)] bg-[var(--mist)] p-3.5 text-xs leading-relaxed text-[var(--ink-soft)]">
+                    <span className="mb-1 block font-bold text-[var(--ink)]">Kenapa ini bahaya?</span>
                     {activeExplanation.explanation}
                   </div>
 
-                  <div className="text-xs font-black text-amber-400 flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4" /> +{activeExplanation.points} Poin Edukasi Didapatkan!
+                  <div className="flex items-center gap-2 text-xs font-bold text-[var(--teal-deep)]">
+                    <Mascot name="success" alt="" className="h-7 w-7" /> +{activeExplanation.points} poin edukasi
                   </div>
                 </div>
               ) : (
-                <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400 border border-dashed border-slate-800 rounded-xl">
-                  <HelpCircle className="w-10 h-10 text-slate-600 mb-2" />
-                  <p className="text-sm font-semibold">
-                    Klik item di layar chat (file, kalimat, atau profil kontak) untuk mengungkap kejanggalan!
+                <div className="flex h-full flex-col items-center justify-center rounded-[8px] border border-dashed border-[var(--line-strong)] p-6 text-center">
+                  <HelpCircle size={30} className="mb-2 text-[var(--ink-muted)]" />
+                  <p className="text-sm font-medium text-[var(--ink-muted)]">
+                    Klik item di layar chat (file, kalimat, atau profil kontak) untuk mengungkap
+                    kejanggalan.
                   </p>
                 </div>
               )}
             </div>
 
-            {/* Checklist Bukti Ringkas */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-2">
-              <div className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                Daftar Cek Keamanan:
+            {/* Checklist bukti */}
+            <div className="card p-4">
+              <div className="mb-2 text-[0.75rem] font-bold text-[var(--ink-soft)]">Daftar cek keamanan</div>
+              <div className="space-y-2">
+                {redFlags.map((flag) => (
+                  <div
+                    key={flag.id}
+                    onClick={() => handleInspectTarget(flag.id)}
+                    className={`flex cursor-pointer items-center justify-between rounded-[8px] border px-2.5 py-2 text-xs transition-colors ${
+                      flag.isFound
+                        ? 'border-[#b9dcd9] bg-[var(--teal-tint)] text-[var(--teal-deep)]'
+                        : 'border-[var(--line)] bg-[var(--white)] text-[var(--ink-muted)] hover:border-[var(--line-strong)]'
+                    }`}
+                  >
+                    <span className="font-semibold">{flag.name}</span>
+                    {flag.isFound ? (
+                      <span className="rounded bg-[var(--teal-deep)] px-1.5 py-0.5 text-[10px] font-bold text-white">
+                        DITEMUKAN
+                      </span>
+                    ) : (
+                      <span className="text-[10px]">Belum dicek</span>
+                    )}
+                  </div>
+                ))}
               </div>
-              {redFlags.map((flag) => (
-                <div
-                  key={flag.id}
-                  onClick={() => handleInspectTarget(flag.id)}
-                  className={`flex items-center justify-between text-xs p-2 rounded-lg border cursor-pointer transition-all ${
-                    flag.isFound
-                      ? 'bg-emerald-950/30 border-emerald-600 text-emerald-200'
-                      : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
-                  }`}
-                >
-                  <span className="font-semibold">{flag.name}</span>
-                  {flag.isFound ? (
-                    <span className="text-[10px] bg-emerald-500 text-slate-950 font-bold px-1.5 py-0.5 rounded">
-                      DITEMUKAN
-                    </span>
-                  ) : (
-                    <span className="text-[10px] text-slate-500">Belum Dicek</span>
-                  )}
-                </div>
-              ))}
             </div>
 
-            {/* Tombol Aksi Kembali */}
-            <div className="pt-2">
+            {/* Tombol aksi */}
+            <div>
               <button
                 onClick={() => {
                   playClick();
                   onFinishInspection();
                 }}
                 disabled={!isKeyFound}
-                className={`w-full py-3.5 px-5 rounded-xl font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 border-2 border-black transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] ${
-                  isKeyFound
-                    ? 'bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 active:scale-95'
-                    : 'bg-slate-800 text-slate-500 cursor-not-allowed border-slate-700'
-                }`}
+                className="btn btn-primary btn-block justify-center"
               >
-                <ArrowLeft className="w-5 h-5" />
-                {isKeyFound
-                  ? 'Konfirmasi Bukti & Edukasi Ibu!'
-                  : 'Temukan File APK Terlebih Dahulu'}
+                <ArrowLeft size={16} />
+                {isKeyFound ? 'Konfirmasi bukti & edukasi Ibu' : 'Temukan file APK terlebih dahulu'}
               </button>
             </div>
 
           </div>
-
         </div>
 
       </div>

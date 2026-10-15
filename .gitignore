@@ -49,3 +49,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local logs & agent tool dirs
+dev.log
+/.claude/
+/.codex/
+/.cursor/
+/.impeccable/

@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ShieldCheck, FileWarning, Hourglass, HelpCircle, Check, X, Sparkles } from 'lucide-react';
+import { ShieldCheck, FileWarning, Hourglass, Check } from 'lucide-react';
 import { EvidenceCard } from '../types/game';
+import { Mascot } from './Mascot';
 import { playBuzz, playClick, playDramaticHit, playEvidenceFound } from '../utils/sound';
 
 interface DebateModalProps {
@@ -22,11 +23,11 @@ export const DebateModal: React.FC<DebateModalProps> = ({
   const getIcon = (iconName: string) => {
     switch (iconName) {
       case 'FileWarning':
-        return <FileWarning className="w-6 h-6 text-rose-400" />;
+        return <FileWarning className="h-6 w-6 text-[var(--red-deep)]" />;
       case 'Hourglass':
-        return <Hourglass className="w-6 h-6 text-amber-400" />;
+        return <Hourglass className="h-6 w-6 text-[#6d5410]" />;
       default:
-        return <ShieldCheck className="w-6 h-6 text-emerald-400" />;
+        return <ShieldCheck className="h-6 w-6 text-[var(--teal-deep)]" />;
     }
   };
 
@@ -47,7 +48,7 @@ export const DebateModal: React.FC<DebateModalProps> = ({
 
       setFeedback({
         isSuccess: true,
-        text: 'TEPAT SEKALI! "Lihat_Foto_Paket.pdf.apk" adalah file aplikasi Android (APK) yang menyamar. Jika dibuka, ia akan meminta izin akses SMS untuk mencuri kode OTP m-Banking Ibu!',
+        text: 'Tepat sekali! "Lihat_Foto_Paket.pdf.apk" adalah file aplikasi Android (APK) yang menyamar. Jika dibuka, ia akan meminta izin akses SMS untuk mencuri kode OTP m-Banking Ibu!',
       });
 
       setTimeout(() => {
@@ -64,103 +65,86 @@ export const DebateModal: React.FC<DebateModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl bg-slate-900 border-4 border-amber-400 rounded-3xl p-6 md:p-8 shadow-[0_0_60px_rgba(245,158,11,0.3)] flex flex-col space-y-6">
-        
-        {/* Header Debat Komik */}
-        <div className="text-center space-y-2 border-b-2 border-slate-800 pb-4">
-          <div className="inline-block bg-amber-400 text-slate-950 px-4 py-1 rounded-md font-black text-sm uppercase -rotate-1 border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-            KONFRONTASI BUKTI
-          </div>
-          <h2 className="text-2xl md:text-3xl font-black text-white tracking-wide">
-            Sodorkan Bukti Terkuat Kepada Ibu!
-          </h2>
-          <p className="text-sm text-slate-300 max-w-xl mx-auto">
-            Ibu masih ragu karena kurir terus mengancam. Pilih kartu bukti dari Notebook Investigasimu yang paling membuktikan bahwa ini adalah penipuan:
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(14,22,38,0.6)] p-4 backdrop-blur-sm">
+      <div className="flex w-full max-w-4xl flex-col space-y-6 rounded-[14px] border border-[var(--line-strong)] bg-[var(--white)] p-6 shadow-[0_24px_70px_rgba(14,22,38,0.35)] md:p-8">
+
+        {/* Header */}
+        <div className="space-y-2 border-b border-[var(--line)] pb-4 text-center">
+          <span className="chip chip-yellow">Konfrontasi bukti</span>
+          <h2 className="text-[1.6rem] md:text-[1.9rem]">Sodorkan bukti terkuat kepada Ibu!</h2>
+          <p className="mx-auto max-w-xl text-sm leading-6 text-[var(--ink-muted)]">
+            Ibu masih ragu karena kurir terus mengancam. Pilih kartu bukti dari notebook
+            investigasimu yang paling membuktikan bahwa ini adalah penipuan:
           </p>
         </div>
 
-        {/* Pilihan Kartu Bukti */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Pilihan kartu bukti */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {evidenceList.map((card) => {
             const isSelected = selectedId === card.id;
             return (
               <div
                 key={card.id}
                 onClick={() => handleSelect(card.id)}
-                className={`p-5 rounded-2xl border-3 cursor-pointer transition-all flex flex-col justify-between group ${
+                className={`flex cursor-pointer flex-col justify-between rounded-[10px] border p-5 transition-all ${
                   isSelected
-                    ? 'border-amber-400 bg-amber-950/40 shadow-[0_0_20px_rgba(245,158,11,0.4)] scale-105'
-                    : 'border-slate-700 bg-slate-950/80 hover:border-slate-500 hover:bg-slate-900'
+                    ? '-translate-y-0.5 border-[var(--teal-deep)] bg-white shadow-[0_10px_30px_rgba(14,22,38,0.14)] ring-1 ring-[var(--teal-deep)]'
+                    : 'border-[var(--line-strong)] bg-[var(--white)] hover:border-[var(--ink)]'
                 }`}
               >
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-700">
-                      {getIcon(card.icon)}
-                    </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
-                      {card.category}
-                    </span>
+                  <div className="mb-3 flex items-center justify-between">
+                    <span className="icon-tile !bg-[var(--mist)]">{getIcon(card.icon)}</span>
+                    <span className="chip">{card.category}</span>
                   </div>
 
-                  <h3 className="font-bold text-white text-base group-hover:text-amber-300 transition-colors mb-2">
-                    {card.title}
-                  </h3>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    {card.detailedFact}
-                  </p>
+                  <h3 className="mb-2 text-base font-bold text-[var(--ink)]">{card.title}</h3>
+                  <p className="text-xs leading-relaxed text-[var(--ink-muted)]">{card.detailedFact}</p>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-                  <span className="text-slate-400 font-semibold">Pilih Kartu Ini</span>
-                  <div
-                    className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
-                      isSelected
-                        ? 'border-amber-400 bg-amber-400 text-slate-950'
-                        : 'border-slate-600'
+                <div className="mt-4 flex items-center justify-between border-t border-[var(--line)] pt-3 text-xs">
+                  <span className="font-semibold text-[var(--ink-muted)]">Pilih kartu ini</span>
+                  <span
+                    className={`flex h-5 w-5 items-center justify-center rounded-full border ${
+                      isSelected ? 'border-[var(--teal-deep)] bg-[var(--teal-deep)] text-white' : 'border-[var(--line-strong)]'
                     }`}
                   >
-                    {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
-                  </div>
+                    {isSelected && <Check className="h-3.5 w-3.5 stroke-[3]" />}
+                  </span>
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* Feedback Area */}
+        {/* Feedback */}
         {feedback && (
           <div
-            className={`p-4 rounded-xl border-2 flex items-start gap-3 animate-in fade-in duration-200 ${
+            className={`fade-slide-up flex items-start gap-3 rounded-[10px] border p-4 ${
               feedback.isSuccess
-                ? 'bg-emerald-950/70 border-emerald-500 text-emerald-100'
-                : 'bg-rose-950/70 border-rose-500 text-rose-100'
+                ? 'border-[#b9dcd9] bg-[var(--teal-tint)]'
+                : 'border-[#f0c4c4] bg-[var(--red-tint)]'
             }`}
           >
             {feedback.isSuccess ? (
-              <Sparkles className="w-6 h-6 text-emerald-400 shrink-0 mt-0.5" />
+              <Mascot name="success" alt="" className="mt-0.5 h-9 w-9 shrink-0" />
             ) : (
-              <X className="w-6 h-6 text-rose-400 shrink-0 mt-0.5" />
+              <Mascot name="alert" alt="" className="mt-0.5 h-9 w-9 shrink-0" />
             )}
-            <div className="text-sm font-semibold leading-relaxed">
+            <div
+              className={`text-sm font-semibold leading-relaxed ${
+                feedback.isSuccess ? 'text-[var(--teal-deep)]' : 'text-[var(--red-deep)]'
+              }`}
+            >
               {feedback.text}
             </div>
           </div>
         )}
 
-        {/* Action Button */}
+        {/* Aksi */}
         <div className="flex justify-center pt-2">
-          <button
-            onClick={handleSubmit}
-            disabled={!selectedId}
-            className={`py-3.5 px-8 rounded-xl font-black text-sm uppercase tracking-wider border-2 border-black transition-all shadow-[4px_4px_0px_rgba(0,0,0,1)] ${
-              selectedId
-                ? 'bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 active:scale-95'
-                : 'bg-slate-800 text-slate-500 cursor-not-allowed border-slate-700'
-            }`}
-          >
-            Sodorkan Bukti Ini ke Ibu!
+          <button onClick={handleSubmit} disabled={!selectedId} className="btn btn-primary btn-lg">
+            Sodorkan bukti ini ke Ibu!
           </button>
         </div>
 

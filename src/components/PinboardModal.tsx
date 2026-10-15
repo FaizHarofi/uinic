@@ -3,28 +3,24 @@
 import React, { useState } from 'react';
 import {
   Pin,
-  CheckCircle2,
-  AlertTriangle,
   FileCode,
-  ShieldAlert,
   Brain,
   UserX,
   HelpCircle,
   ArrowRight,
-  Sparkles,
   Move,
+  Check,
 } from 'lucide-react';
-import { GameChapter, PinboardClue, PinboardTargetCategory } from '../types/game';
+import { PinboardClue, PinboardTargetCategory } from '../types/game';
+import { Mascot } from './Mascot';
 import { playBuzz, playClick, playEvidenceFound, playStampReveal } from '../utils/sound';
 
 interface PinboardModalProps {
-  chapter: GameChapter;
   clues: PinboardClue[];
   onFinishPinboard: () => void;
 }
 
 export const PinboardModal: React.FC<PinboardModalProps> = ({
-  chapter,
   clues,
   onFinishPinboard,
 }) => {
@@ -36,37 +32,29 @@ export const PinboardModal: React.FC<PinboardModalProps> = ({
     id: PinboardTargetCategory;
     title: string;
     subtitle: string;
-    color: string;
     border: string;
-    bg: string;
     icon: React.ReactNode;
   }[] = [
     {
       id: 'malware',
-      title: 'MUATAN TEKNIS MALWARE',
+      title: 'Muatan teknis malware',
       subtitle: 'Program jahat, ekstensi palsu, & penyadapan sistem',
-      color: 'text-rose-400',
-      border: 'border-rose-500/80',
-      bg: 'bg-rose-950/30',
-      icon: <FileCode className="w-5 h-5 text-rose-400" />,
+      border: 'border-[var(--red)]',
+      icon: <FileCode className="h-5 w-5 text-[var(--red-deep)]" />,
     },
     {
       id: 'social_eng',
-      title: 'MANIPULASI PSIKOLOGIS',
+      title: 'Manipulasi psikologis',
       subtitle: 'Pemicu panik, rasa takut, & iming-iming keserakahan',
-      color: 'text-amber-400',
-      border: 'border-amber-500/80',
-      bg: 'bg-amber-950/30',
-      icon: <Brain className="w-5 h-5 text-amber-400" />,
+      border: 'border-[#E0B84A]',
+      icon: <Brain className="h-5 w-5 text-[#6d5410]" />,
     },
     {
       id: 'impersonation',
-      title: 'IDENTITAS & REKAM JEJAK PALSU',
+      title: 'Identitas & rekam jejak palsu',
       subtitle: 'Penyamaran instansi, nomor asing, & bursa fiktif',
-      color: 'text-cyan-400',
-      border: 'border-cyan-500/80',
-      bg: 'bg-cyan-950/30',
-      icon: <UserX className="w-5 h-5 text-cyan-400" />,
+      border: 'border-[var(--ink)]',
+      icon: <UserX className="h-5 w-5 text-[var(--ink)]" />,
     },
   ];
 
@@ -115,63 +103,60 @@ export const PinboardModal: React.FC<PinboardModalProps> = ({
       setTimeout(() => setFeedback(null), 2500);
     } else {
       playBuzz();
-      setFeedback(`KURANG PAS: "${clue.title}" bukan kategori itu. Coba teliti apakah itu manipulasi emosi, muatan kode, atau identitas palsu!`);
+      setFeedback(
+        `KURANG PAS: "${clue.title}" bukan kategori itu. Coba teliti apakah itu manipulasi emosi, muatan kode, atau identitas palsu!`
+      );
       setTimeout(() => setFeedback(null), 3000);
     }
   };
 
   const unsortedClues = clueList.filter((c) => c.currentCategory === null);
   const isAllSolved = unsortedClues.length === 0;
+  const feedbackOk = feedback?.startsWith('TEPAT');
 
   return (
-    <div className="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex items-center justify-center p-3 md:p-6 select-none overflow-hidden font-sans">
-      <div className="relative w-full max-w-6xl max-h-[94vh] bg-[#1a1510] border-6 border-[#3e2e1c] rounded-3xl shadow-[0_0_80px_rgba(0,0,0,0.95)] flex flex-col justify-between overflow-hidden">
-        
-        {/* Corkboard Texture Overlay */}
-        <div className="absolute inset-0 bg-[radial-gradient(#2d1f11_2px,transparent_2px)] [background-size:16px_16px] opacity-40 pointer-events-none" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center select-none overflow-hidden bg-[rgba(14,22,38,0.65)] p-3 backdrop-blur-sm md:p-6">
+      <div className="relative flex max-h-[94vh] w-full max-w-6xl flex-col overflow-hidden rounded-[14px] border border-[var(--line-strong)] bg-[var(--white)] shadow-[0_24px_70px_rgba(14,22,38,0.4)]">
 
-        {/* Header Papan Detektif */}
-        <div className="bg-[#241a10] border-b-4 border-[#3e2e1c] px-6 py-3.5 flex items-center justify-between text-white z-10 shadow-md">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-red-600 border-2 border-black flex items-center justify-center shadow-lg -rotate-6">
-              <Pin className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h2 className="text-lg md:text-xl font-black text-amber-200 tracking-wider uppercase flex items-center gap-2">
-                PAPAN INVESTIGASI BENANG MERAH (DETECTIVE PINBOARD)
+        {/* Header */}
+        <div className="flex items-center justify-between gap-4 border-b border-[var(--line)] px-5 py-3.5 md:px-6">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="icon-tile shrink-0 !bg-[var(--red-tint)] !text-[var(--red-deep)]">
+              <Pin className="h-5 w-5" />
+            </span>
+            <div className="min-w-0">
+              <h2 className="truncate text-[1.1rem] font-bold leading-tight md:text-[1.25rem]">
+                Papan investigasi: benang merah
               </h2>
-              <p className="text-xs text-amber-100/70 font-medium">
-                Tarik (Drag) atau Klik kartu bukti di bawah ke kategori kejahatan yang sesuai!
+              <p className="truncate text-[0.8rem] text-[var(--ink-muted)]">
+                Tarik (drag) atau klik kartu bukti, lalu pilih kategori kejahatan yang sesuai.
               </p>
             </div>
           </div>
-
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-bold text-amber-300 bg-black/60 px-3 py-1 rounded-full border border-amber-500/40">
-              KORELASI: {clueList.filter((c) => c.currentCategory !== null).length} / {clueList.length}
-            </span>
-          </div>
+          <span className={`chip shrink-0 ${isAllSolved ? 'chip-teal' : 'chip-yellow'}`}>
+            Korelasi {clueList.filter((c) => c.currentCategory !== null).length} / {clueList.length}
+          </span>
         </div>
 
-        {/* Main Content Area */}
-        <div className="flex-1 p-5 md:p-6 overflow-y-auto space-y-6 z-10 flex flex-col justify-between">
-          
-          {/* 1. CLUE POOL (Kartu Bukti yang Belum Dipasang) */}
-          <div className="bg-black/50 border-2 border-amber-900/60 rounded-2xl p-4 shadow-inner">
-            <div className="flex items-center justify-between mb-2.5">
-              <span className="text-xs font-black uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
-                <Move className="w-4 h-4 text-amber-400" />
-                Kartu Bukti Temuan (Drag ke Bawah atau Klik untuk Memilih):
+        {/* Konten */}
+        <div className="flex flex-1 flex-col justify-between space-y-5 overflow-y-auto bg-[var(--mist)] p-5 md:p-6">
+
+          {/* 1. Kolam bukti */}
+          <div className="card p-4">
+            <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
+              <span className="flex items-center gap-1.5 text-xs font-bold text-[var(--ink-soft)]">
+                <Move className="h-4 w-4" />
+                Kartu bukti temuan — tarik ke bawah atau klik untuk memilih
               </span>
               {selectedClueId && (
-                <span className="text-[11px] font-bold text-emerald-300 animate-pulse">
-                  Kartu Terpilih! Sekarang klik salah satu kotak kategori di bawah.
+                <span className="text-[11px] font-bold text-[var(--teal-deep)]">
+                  Kartu terpilih! Sekarang klik salah satu kotak kategori di bawah.
                 </span>
               )}
             </div>
 
             {unsortedClues.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
                 {unsortedClues.map((clue) => {
                   const isSelected = selectedClueId === clue.id;
                   return (
@@ -180,49 +165,54 @@ export const PinboardModal: React.FC<PinboardModalProps> = ({
                       draggable
                       onDragStart={(e) => handleDragStart(e, clue.id)}
                       onClick={() => handleSelectClue(clue.id)}
-                      className={`relative p-3.5 rounded-xl border-2 cursor-grab active:cursor-grabbing transition-all hover:-translate-y-1 shadow-lg bg-[#2d2218] ${
+                      className={`relative cursor-grab rounded-[10px] border bg-white p-3.5 transition-all hover:-translate-y-1 active:cursor-grabbing ${
                         isSelected
-                          ? 'border-yellow-300 ring-4 ring-yellow-400/50 scale-105'
-                          : 'border-amber-700/80 hover:border-amber-400'
+                          ? '-translate-y-0.5 border-[var(--teal-deep)] ring-2 ring-[var(--teal-deep)]'
+                          : 'border-[var(--line-strong)] hover:border-[var(--ink)]'
                       }`}
                     >
-                      {/* Red Pin Header */}
-                      <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-red-600 border border-black shadow" />
-                      
+                      {/* Pin */}
+                      <span
+                        className="absolute -top-2 left-1/2 h-4 w-4 -translate-x-1/2 rounded-full border-2 border-white bg-[var(--yellow)] shadow"
+                        aria-hidden
+                      />
+
                       <div className="pt-1">
-                        <div className="text-xs font-black text-amber-200 mb-1 leading-snug">
-                          {clue.title}
-                        </div>
-                        <div className="text-[11px] text-slate-300 leading-snug">
-                          {clue.snippet}
-                        </div>
+                        <div className="mb-1 text-xs font-bold leading-snug text-[var(--ink)]">{clue.title}</div>
+                        <div className="text-[11px] leading-snug text-[var(--ink-muted)]">{clue.snippet}</div>
                       </div>
 
-                      <div className="mt-2.5 pt-2 border-t border-amber-900/50 flex items-center justify-between text-[10px] text-amber-400 font-bold">
-                        <span>Tarik atau Klik</span>
-                        <Move className="w-3 h-3" />
+                      <div className="mt-2.5 flex items-center justify-between border-t border-[var(--line)] pt-2 text-[10px] font-bold text-[var(--ink-muted)]">
+                        <span>Tarik atau klik</span>
+                        <Move className="h-3 w-3" />
                       </div>
                     </div>
                   );
                 })}
               </div>
             ) : (
-              <div className="py-4 text-center text-xs font-bold text-emerald-400 flex items-center justify-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+              <div className="flex items-center justify-center gap-2 py-4 text-xs font-bold text-[var(--teal-deep)]">
+                <Mascot name="success" alt="" className="h-7 w-7" />
                 Semua kartu bukti telah berhasil dipasang ke papan investigasi!
               </div>
             )}
           </div>
 
-          {/* Feedback Toast */}
+          {/* Feedback */}
           {feedback && (
-            <div className="p-3 bg-black/80 border-2 border-amber-400 rounded-xl text-center text-xs md:text-sm font-bold text-amber-300 animate-in fade-in duration-200">
+            <div
+              className={`fade-slide-up rounded-[10px] border p-3 text-center text-xs font-bold md:text-sm ${
+                feedbackOk
+                  ? 'border-[#b9dcd9] bg-[var(--teal-tint)] text-[var(--teal-deep)]'
+                  : 'border-[#f0c4c4] bg-[var(--red-tint)] text-[var(--red-deep)]'
+              }`}
+            >
               {feedback}
             </div>
           )}
 
-          {/* 2. THREE TARGET CATEGORY DROPZONES */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* 2. Tiga zona kategori */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {categories.map((cat) => {
               const placedClues = clueList.filter((c) => c.currentCategory === cat.id);
               return (
@@ -231,70 +221,60 @@ export const PinboardModal: React.FC<PinboardModalProps> = ({
                   onDragOver={handleDragOver}
                   onDrop={(e) => handleDropOnCategory(e, cat.id)}
                   onClick={() => handleCategoryClick(cat.id)}
-                  className={`relative p-4 rounded-2xl border-3 border-dashed ${cat.border} ${cat.bg} backdrop-blur-md min-h-[220px] flex flex-col justify-between transition-all cursor-pointer hover:bg-black/40 group`}
+                  className={`relative flex min-h-[220px] cursor-pointer flex-col justify-between rounded-[12px] border-2 border-dashed bg-white p-4 transition-all hover:bg-[var(--mist)] ${cat.border}`}
                 >
-                  {/* Decorative Pin at Top Left */}
-                  <div className="absolute -top-3 left-4 w-6 h-6 rounded-full bg-red-600 border-2 border-black flex items-center justify-center shadow-lg -rotate-12">
-                    <Pin className="w-3.5 h-3.5 text-white" />
-                  </div>
-
                   <div>
-                    <div className="flex items-center gap-2 mb-1 mt-1">
+                    <div className="mb-1 mt-1 flex items-center gap-2">
                       {cat.icon}
-                      <h3 className={`text-sm font-black uppercase tracking-wide ${cat.color}`}>
-                        {cat.title}
-                      </h3>
+                      <h3 className="text-sm font-bold text-[var(--ink)]">{cat.title}</h3>
                     </div>
-                    <p className="text-[11px] text-slate-400 mb-3 leading-tight">
-                      {cat.subtitle}
-                    </p>
+                    <p className="mb-3 text-[11px] leading-tight text-[var(--ink-muted)]">{cat.subtitle}</p>
 
-                    {/* Placed Clues Stack */}
                     <div className="space-y-2">
                       {placedClues.map((clue) => (
                         <div
                           key={clue.id}
-                          className="p-2.5 rounded-lg bg-black/70 border border-emerald-500/80 text-white text-xs shadow animate-in zoom-in-95 duration-200"
+                          className="fade-slide-up rounded-[8px] border border-[#b9dcd9] bg-[var(--teal-tint)] p-2.5 text-xs"
                         >
-                          <div className="flex items-center justify-between text-emerald-400 font-bold mb-0.5">
-                            <span>✓ {clue.title}</span>
-                            <span className="text-[9px] bg-emerald-500/20 px-1.5 py-0.5 rounded border border-emerald-500/40">
+                          <div className="mb-0.5 flex items-center justify-between font-bold text-[var(--teal-deep)]">
+                            <span className="flex items-center gap-1">
+                              <Check className="h-3 w-3 stroke-[3]" /> {clue.title}
+                            </span>
+                            <span className="rounded border border-[#b9dcd9] bg-white px-1.5 py-0.5 text-[9px]">
                               TERPIN
                             </span>
                           </div>
-                          <div className="text-[10px] text-slate-300">{clue.snippet}</div>
+                          <div className="text-[10px] text-[var(--ink-soft)]">{clue.snippet}</div>
                         </div>
                       ))}
 
                       {placedClues.length === 0 && (
-                        <div className="py-8 text-center text-slate-500 border border-dashed border-slate-700/60 rounded-xl text-xs flex flex-col items-center justify-center gap-1.5">
-                          <HelpCircle className="w-6 h-6 text-slate-600" />
-                          <span>Drop bukti ke sini</span>
+                        <div className="flex flex-col items-center justify-center gap-1.5 rounded-[8px] border border-dashed border-[var(--line-strong)] py-8 text-center text-xs text-[var(--ink-muted)]">
+                          <HelpCircle className="h-6 w-6 text-[var(--line-strong)]" />
+                          <span>Jatuhkan bukti ke sini</span>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Red String Indicator */}
-                  <div className="mt-3 pt-2 border-t border-white/10 flex items-center justify-between text-[11px] font-bold text-slate-400">
-                    <span>Bukti Terhubung:</span>
-                    <span className={placedClues.length > 0 ? 'text-emerald-400 font-black' : 'text-slate-500'}>
-                      {placedClues.length} Kartu
+                  <div className="mt-3 flex items-center justify-between border-t border-[var(--line)] pt-2 text-[11px] font-bold text-[var(--ink-muted)]">
+                    <span>Bukti terhubung:</span>
+                    <span className={placedClues.length > 0 ? 'text-[var(--teal-deep)]' : ''}>
+                      {placedClues.length} kartu
                     </span>
                   </div>
                 </div>
               );
             })}
           </div>
-
         </div>
 
-        {/* Footer Action Button */}
-        <div className="bg-[#241a10] border-t-4 border-[#3e2e1c] px-6 py-3.5 flex items-center justify-between z-10">
-          <div className="text-xs text-amber-200 font-bold">
+        {/* Footer */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--line)] px-5 py-3.5 md:px-6">
+          <div className="text-xs font-bold text-[var(--ink-soft)]">
             {isAllSolved
-              ? '🎉 Semua korelasi bukti telah terhubung sempurna!'
-              : '⚠️ Hubungkan semua kartu temuan ke dalam 3 kategori di atas.'}
+              ? 'Semua korelasi bukti telah terhubung sempurna!'
+              : 'Hubungkan semua kartu temuan ke dalam 3 kategori di atas.'}
           </div>
 
           <button
@@ -308,14 +288,10 @@ export const PinboardModal: React.FC<PinboardModalProps> = ({
               }
             }}
             disabled={!isAllSolved}
-            className={`py-3 px-6 rounded-xl font-black text-xs md:text-sm uppercase tracking-wider flex items-center gap-2 border-2 border-black transition-all shadow-[3px_3px_0px_rgba(0,0,0,1)] ${
-              isAllSolved
-                ? 'bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 active:scale-95 animate-bounce'
-                : 'bg-slate-800 text-slate-500 cursor-not-allowed border-slate-700'
-            }`}
+            className="btn btn-primary justify-center"
           >
-            <span>Tarik Kesimpulan & Lanjutkan Cerita</span>
-            <ArrowRight className="w-4 h-4" />
+            Tarik kesimpulan &amp; lanjutkan cerita
+            <ArrowRight className="h-4 w-4" />
           </button>
         </div>
 

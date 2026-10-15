@@ -1,39 +1,233 @@
 @import "tailwindcss";
 
-:root {
-  --background: #030712;
-  --foreground: #f9fafb;
+/* ============================================================
+   AWAS SCAM! — Editorial Digital Detective
+   Ink / Paper / Signal: Ink Navy #17243A · Cool Mist #F3F5F8
+   Signal Teal #168C87 · Alert Red #D94B4B · Evidence Yellow #F0C75E
+   Type: Newsreader (display) + Public Sans (body), OFL, self-hosted
+   ============================================================ */
+
+@font-face {
+  font-family: 'Newsreader';
+  src: url('/fonts/newsreader-latin.woff2') format('woff2');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
 }
+@font-face {
+  font-family: 'Public Sans';
+  src: url('/fonts/publicsans-latin.woff2') format('woff2');
+  font-weight: 300 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --ink: #17243a;
+  --ink-soft: #33415c;
+  --ink-muted: #56647c;
+  --line: #dce2ea;
+  --line-strong: #c3ccd9;
+  --mist: #f3f5f8;
+  --white: #ffffff;
+  --teal: #168c87;
+  --teal-deep: #0f6b67;
+  --teal-tint: #e3f1f0;
+  --red: #d94b4b;
+  --red-btn: #c23a3a;
+  --red-deep: #b03535;
+  --red-tint: #fbebeb;
+  --yellow: #f0c75e;
+  --yellow-tint: #fbf2da;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  overflow: hidden;
-  user-select: none;
+  background: var(--mist);
+  color: var(--ink);
+  font-family: 'Public Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  overflow-x: hidden;
 }
 
+h1, h2, h3, h4 {
+  font-family: 'Newsreader', Georgia, 'Times New Roman', serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.18;
+  text-wrap: balance;
+}
+
+::selection { background: var(--yellow); color: var(--ink); }
+input, textarea { caret-color: var(--teal-deep); }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--mist); }
+::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-muted); }
+
+button, a { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible, [role='button']:focus-visible,
+input:focus-visible, [tabindex]:focus-visible, summary:focus-visible {
+  outline: 3px solid var(--teal-deep);
+  outline-offset: 2px;
+}
+
+@layer components {
+  /* ---------- Tombol ---------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: 'Public Sans', ui-sans-serif, system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    line-height: 1.15;
+    border: 1.5px solid transparent;
+    border-radius: 6px;
+    padding: 0.78rem 1.3rem;
+    background: var(--white);
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    text-align: center;
+  }
+  .btn[disabled], .btn[aria-disabled='true'] { opacity: 0.5; pointer-events: none; }
+
+  .btn-primary { background: var(--ink); color: var(--white); }
+  .btn-primary:hover { background: #223455; }
+  .btn-teal { background: var(--teal-deep); color: var(--white); }
+  .btn-teal:hover { background: #0b5450; }
+  .btn-secondary { background: var(--white); color: var(--ink); border-color: var(--line-strong); }
+  .btn-secondary:hover { border-color: var(--ink); }
+  .btn-danger { background: var(--red-btn); color: var(--white); }
+  .btn-danger:hover { background: #a52f2f; }
+  .btn-ghost { background: transparent; color: var(--ink-soft); border-color: transparent; }
+  .btn-ghost:hover { background: var(--white); border-color: var(--line); color: var(--ink); }
+
+  .btn-sm { padding: 0.5rem 0.9rem; font-size: 0.86rem; }
+  .btn-lg { padding: 0.95rem 1.7rem; font-size: 1.02rem; }
+  .btn-block { width: 100%; }
+
+  /* ---------- Permukaan ---------- */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .card-hover { transition: border-color 0.15s ease; }
+  .card-hover:hover { border-color: var(--ink-muted); }
+
+  .panel-ink { background: var(--ink); color: var(--white); border-radius: 6px; }
+  .panel-tint { background: var(--yellow-tint); border: 1px solid var(--yellow); border-radius: 6px; }
+
+  /* ---------- Chip / label ---------- */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: 'Public Sans', ui-sans-serif, system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 0.78rem;
+    line-height: 1.25;
+    padding: 0.26rem 0.55rem;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: var(--white);
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+  .chip-ink { background: var(--ink); color: var(--white); border-color: var(--ink); }
+  .chip-teal { background: var(--teal-tint); color: var(--teal-deep); border-color: #b9dcd9; }
+  .chip-red { background: var(--red-tint); color: var(--red-deep); border-color: #f0c4c4; }
+  .chip-yellow { background: var(--yellow-tint); color: #6d5410; border-color: #ecd9a3; }
+  .chip-outline { background: var(--white); }
+
+  /* ---------- Progress ---------- */
+  .meter { height: 8px; background: var(--white); border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+  .meter > span { display: block; height: 100%; border-radius: 999px; background: var(--teal); transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+  .level-dots { display: inline-flex; gap: 3px; }
+  .level-dots i { width: 7px; height: 7px; border-radius: 2px; background: var(--line-strong); display: block; }
+  .level-dots i.on { background: var(--ink); }
+
+  /* ---------- Elemen game ---------- */
+  .icon-tile {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 6px;
+    background: var(--mist);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    flex: none;
+  }
+
+  .note-mascot {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--yellow);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+  }
+
+  .link-underline { text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+
+  /* Panel gelap khusus artefak (layar WA, panggilan) — bukan tema situs */
+  .artifact-dark { background: #0b141a; color: #e9edef; }
+}
+
+/* ---------- Animasi ---------- */
+@keyframes pop {
+  0% { transform: scale(0.92); opacity: 0; }
+  60% { transform: scale(1.02); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-6px); }
-  40%, 80% { transform: translateX(6px); }
+  25%, 75% { transform: translateX(-4px); }
+  50% { transform: translateX(4px); }
+}
+@keyframes score-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.animate-shake {
-  animation: shake 0.4s ease-in-out;
-}
+.animate-pop { animation: pop 0.3s ease-out both; }
+.animate-rise { animation: rise 0.35s ease-out both; }
+.animate-shake { animation: shake 0.35s ease-in-out; }
+.animate-score { animation: score-pop 0.4s ease-out; }
+.animate-stagger > * { animation: rise 0.35s ease-out both; }
+.animate-stagger > *:nth-child(2) { animation-delay: 0.06s; }
+.animate-stagger > *:nth-child(3) { animation-delay: 0.12s; }
+.fade-slide-up { animation: fadeSlideUp 0.25s ease-out backwards; }
 
-/* Custom Scrollbar for desktop modals */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #090d16;
-}
-::-webkit-scrollbar-thumb {
-  background: #232d42;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #3b4866;
+.site-shell { min-height: 100dvh; background: var(--mist); color: var(--ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }

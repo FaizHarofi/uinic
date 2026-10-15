@@ -22,17 +22,16 @@ import {
   XCircle,
   Zap,
   Shield,
+  UserRound,
 } from 'lucide-react';
 import { BrowserToolResult } from '../types/game';
 import { playBuzz, playClick, playDramaticHit, playEvidenceFound } from '../utils/sound';
 
-// ─── Props ───────────────────────────────────────────────────────────
 interface BrowserInvestigatorModalProps {
   tools: BrowserToolResult[];
   onFinishInvestigation: () => void;
 }
 
-// ─── Component ───────────────────────────────────────────────────────
 export const BrowserInvestigatorModal: React.FC<BrowserInvestigatorModalProps> = ({
   tools,
   onFinishInvestigation,
@@ -42,7 +41,6 @@ export const BrowserInvestigatorModal: React.FC<BrowserInvestigatorModalProps> =
   const [scanningToolId, setScanningToolId] = useState<string | null>(null);
   const [scanProgress, setScanProgress] = useState(0);
   const [revealedToolId, setRevealedToolId] = useState<string | null>(null);
-  const [screenFlash, setScreenFlash] = useState(false);
   const [fraudScore, setFraudScore] = useState(0);
   const [showFinalBanner, setShowFinalBanner] = useState(false);
   const [countdownSeconds, setCountdownSeconds] = useState(3542);
@@ -99,7 +97,6 @@ export const BrowserInvestigatorModal: React.FC<BrowserInvestigatorModalProps> =
     const target = toolList.find((t) => t.toolId === toolId);
     if (!target) return;
 
-    // Already analyzed — just select to view
     if (target.isAnalyzed) {
       playClick();
       setSelectedToolId(toolId);
@@ -107,7 +104,6 @@ export const BrowserInvestigatorModal: React.FC<BrowserInvestigatorModalProps> =
       return;
     }
 
-    // Already scanning something — block
     if (scanningToolId) {
       playBuzz();
       return;
@@ -119,7 +115,6 @@ export const BrowserInvestigatorModal: React.FC<BrowserInvestigatorModalProps> =
     setScanProgress(0);
     setRevealedToolId(null);
 
-    // Animate progress bar over 1.5s
     const totalSteps = 30;
     const interval = 1500 / totalSteps;
     let step = 0;
@@ -128,11 +123,7 @@ export const BrowserInvestigatorModal: React.FC<BrowserInvestigatorModalProps> =
       setScanProgress(Math.min((step / totalSteps) * 100, 100));
       if (step >= totalSteps) {
         clearInterval(progressTimer);
-
-        // Trigger dramatic reveal
-        setScreenFlash(true);
         playDramaticHit();
-        setTimeout(() => setScreenFlash(false), 200);
 
         setTimeout(() => {
           playEvidenceFound();
@@ -147,88 +138,62 @@ export const BrowserInvestigatorModal: React.FC<BrowserInvestigatorModalProps> =
   };
 
   const toolIcons: Record<string, React.ReactNode> = {
-    whois: <Database className="w-5 h-5" />,
-    cekrekening: <CreditCard className="w-5 h-5" />,
-    reverse_img: <ImageIcon className="w-5 h-5" />,
+    whois: <Database className="h-5 w-5" />,
+    cekrekening: <CreditCard className="h-5 w-5" />,
+    reverse_img: <ImageIcon className="h-5 w-5" />,
   };
 
-  const toolColors: Record<string, string> = {
-    whois: 'from-violet-500 to-indigo-600',
-    cekrekening: 'from-amber-500 to-orange-600',
-    reverse_img: 'from-emerald-500 to-teal-600',
-  };
-
-  const getFraudScoreColor = () => {
-    if (fraudScore < 30) return 'bg-emerald-500';
-    if (fraudScore < 60) return 'bg-amber-500';
-    return 'bg-rose-500';
-  };
-
-  const getFraudScoreGlow = () => {
-    if (fraudScore < 30) return 'shadow-emerald-500/50';
-    if (fraudScore < 60) return 'shadow-amber-500/50';
-    return 'shadow-rose-500/50';
-  };
-
-  // ─── Render Detailed Results ────────────────────────────────────────
+  // ─── Detailed results ──────────────────────────────────────────────
   const renderWhoisResult = (tool: BrowserToolResult) => (
-    <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
-      {/* Warning Stamp */}
-      <div className="flex items-center justify-center">
-        <div className="relative">
-          <div className="border-4 border-rose-500 rounded-lg px-6 py-2 transform -rotate-3 animate-pulse">
-            <span className="text-rose-500 font-black text-lg tracking-widest uppercase">⚠ BAHAYA</span>
-          </div>
-        </div>
+    <div className="fade-slide-up space-y-3">
+      <div className="flex justify-center">
+        <span className="chip chip-red">
+          <ShieldAlert size={13} /> Bahaya — domain baru & tersembunyi
+        </span>
       </div>
 
-      {/* Data Table */}
-      <div className="bg-slate-950/80 rounded-xl border border-slate-700 overflow-hidden">
+      <div className="overflow-hidden rounded-[8px] border border-[var(--line)]">
         <table className="w-full text-xs">
           <tbody>
             {[
               ['Registrar', 'NameCheap Inc. (Budget Registrar)'],
-              ['Domain Dibuat', '12 hari yang lalu'],
+              ['Domain dibuat', '12 hari yang lalu'],
               ['Kadaluarsa', '1 tahun (minimum)'],
-              ['Negara Server', '🇷🇺 Rusia (bukan Indonesia)'],
-              ['SSL Certificate', '❌ Self-signed / Tidak Valid'],
-              ['Pemilik Domain', '🔒 Tersembunyi (WhoisGuard)'],
+              ['Negara server', 'Rusia (bukan Indonesia)'],
+              ['SSL certificate', 'Self-signed / tidak valid'],
+              ['Pemilik domain', 'Tersembunyi (WhoisGuard)'],
             ].map(([label, value], i) => (
-              <tr key={i} className={i % 2 === 0 ? 'bg-slate-900/50' : 'bg-slate-950/50'}>
-                <td className="px-3 py-2 font-bold text-slate-400 border-r border-slate-800 w-1/3">{label}</td>
-                <td className="px-3 py-2 text-rose-300 font-semibold">{value}</td>
+              <tr key={i} className={i % 2 === 0 ? 'bg-[var(--mist)]' : 'bg-white'}>
+                <td className="w-1/3 border-r border-[var(--line)] px-3 py-2 font-semibold text-[var(--ink-muted)]">{label}</td>
+                <td className="px-3 py-2 font-semibold text-[var(--red-deep)]">{value}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      {/* Finding */}
-      <div className="p-3 bg-rose-950/40 border border-rose-500/40 rounded-xl text-rose-200 font-bold text-xs leading-relaxed flex items-start gap-2">
-        <ShieldAlert className="w-4 h-4 mt-0.5 shrink-0 text-rose-400" />
+      <div className="flex items-start gap-2 rounded-[8px] border border-[#f0c4c4] bg-[var(--red-tint)] p-3 text-xs font-semibold leading-relaxed text-[var(--red-deep)]">
+        <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
         <span>{tool.finding}</span>
       </div>
     </div>
   );
 
   const renderCekrekeningResult = (tool: BrowserToolResult) => (
-    <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
-      {/* Danger Stamp */}
-      <div className="flex items-center justify-center">
-        <div className="bg-rose-600 rounded-lg px-6 py-2 transform rotate-2 shadow-lg shadow-rose-600/40">
-          <span className="text-white font-black text-base tracking-wider uppercase">🚨 REKENING TERLAPOR</span>
-        </div>
+    <div className="fade-slide-up space-y-3">
+      <div className="flex justify-center">
+        <span className="chip chip-red">
+          <AlertTriangle size={13} /> Rekening terlapor warga
+        </span>
       </div>
 
-      {/* Report Summary */}
-      <div className="bg-slate-950/80 rounded-xl border border-slate-700 p-3 space-y-2">
+      <div className="space-y-2 rounded-[8px] border border-[var(--line)] bg-white p-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-slate-400 font-bold">Total Laporan</span>
-          <span className="text-lg font-black text-rose-400">47 Laporan</span>
+          <span className="text-xs font-semibold text-[var(--ink-muted)]">Total laporan</span>
+          <span className="text-lg font-bold text-[var(--red-deep)]">47 laporan</span>
         </div>
-        <div className="h-px bg-slate-800" />
+        <div className="h-px bg-[var(--line)]" />
 
-        {/* Reporter List */}
         <div className="space-y-1.5">
           {[
             { name: 'W***n (Bandung)', date: '2 hari lalu', amount: 'Rp 2.500.000' },
@@ -236,80 +201,73 @@ export const BrowserInvestigatorModal: React.FC<BrowserInvestigatorModalProps> =
             { name: 'B***i (Jakarta)', date: '1 minggu lalu', amount: 'Rp 1.800.000' },
             { name: 'R***a (Medan)', date: '1 minggu lalu', amount: 'Rp 3.200.000' },
           ].map((reporter, i) => (
-            <div key={i} className="flex items-center justify-between bg-slate-900/60 rounded-lg px-3 py-1.5 text-[11px]">
+            <div key={i} className="flex items-center justify-between rounded-[6px] bg-[var(--mist)] px-3 py-1.5 text-[11px]">
               <div className="flex items-center gap-2">
-                <XCircle className="w-3.5 h-3.5 text-rose-400" />
-                <span className="text-slate-300 font-semibold">{reporter.name}</span>
+                <XCircle className="h-3.5 w-3.5 text-[var(--red-deep)]" />
+                <span className="font-semibold text-[var(--ink-soft)]">{reporter.name}</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-rose-300 font-bold">{reporter.amount}</span>
-                <span className="text-slate-500">{reporter.date}</span>
+                <span className="font-bold text-[var(--red-deep)]">{reporter.amount}</span>
+                <span className="text-[var(--ink-muted)]">{reporter.date}</span>
               </div>
             </div>
           ))}
-          <div className="text-center text-[10px] text-slate-500 italic">...dan 43 laporan lainnya</div>
+          <div className="text-center text-[10px] italic text-[var(--ink-muted)]">...dan 43 laporan lainnya</div>
         </div>
       </div>
 
-      {/* Finding */}
-      <div className="p-3 bg-rose-950/40 border border-rose-500/40 rounded-xl text-rose-200 font-bold text-xs leading-relaxed flex items-start gap-2">
-        <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0 text-amber-400" />
+      <div className="flex items-start gap-2 rounded-[8px] border border-[#f0c4c4] bg-[var(--red-tint)] p-3 text-xs font-semibold leading-relaxed text-[var(--red-deep)]">
+        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
         <span>{tool.finding}</span>
       </div>
     </div>
   );
 
   const renderReverseImgResult = (tool: BrowserToolResult) => (
-    <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
-      {/* Match Stamp */}
-      <div className="flex items-center justify-center">
-        <div className="border-4 border-amber-500 rounded-lg px-4 py-2 transform -rotate-1 animate-pulse bg-amber-950/30">
-          <span className="text-amber-400 font-black text-sm tracking-wider uppercase">FOTO PALSU TERDETEKSI</span>
-        </div>
+    <div className="fade-slide-up space-y-3">
+      <div className="flex justify-center">
+        <span className="chip chip-red">
+          <Eye size={13} /> Foto profil ternyata stok komersial
+        </span>
       </div>
 
-      {/* Side by Side Comparison */}
       <div className="grid grid-cols-2 gap-3">
-        {/* Their Photo */}
-        <div className="bg-slate-950 rounded-xl border-2 border-slate-700 p-2 space-y-2">
-          <div className="text-[10px] font-bold text-slate-400 text-center uppercase">Foto di Website</div>
-          <div className="aspect-square rounded-lg bg-slate-800 flex flex-col items-center justify-center border border-slate-600 relative overflow-hidden">
-            <div className="text-4xl mb-1">👨‍💼</div>
-            <div className="text-[10px] text-slate-400 font-semibold">"Dr. Hendra Wijaya"</div>
-            <div className="text-[9px] text-slate-500">CEO BursaKripto</div>
-            {/* Red overlay */}
-            <div className="absolute inset-0 bg-rose-500/10 border-2 border-rose-500/50 rounded-lg" />
-            <div className="absolute top-1 right-1 bg-rose-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded">PALSU</div>
+        <div className="rounded-[8px] border border-[var(--line)] bg-white p-2">
+          <div className="mb-2 text-center text-[10px] font-bold uppercase text-[var(--ink-muted)]">Foto di website</div>
+          <div className="relative flex aspect-square flex-col items-center justify-center overflow-hidden rounded-[6px] border border-[#f0c4c4] bg-[var(--red-tint)]">
+            <UserRound className="mb-1 h-9 w-9 text-[var(--red-deep)]" />
+            <div className="text-[10px] font-semibold text-[var(--red-deep)]">&quot;Dr. Hendra Wijaya&quot;</div>
+            <div className="text-[9px] text-[#8a4141]">CEO BursaKripto</div>
+            <span className="absolute right-1 top-1 rounded bg-[var(--red-deep)] px-1.5 py-0.5 text-[8px] font-bold text-white">PALSU</span>
           </div>
         </div>
 
-        {/* Stock Photo Match */}
-        <div className="bg-slate-950 rounded-xl border-2 border-emerald-700/50 p-2 space-y-2">
-          <div className="text-[10px] font-bold text-emerald-400 text-center uppercase">Sumber Asli</div>
-          <div className="aspect-square rounded-lg bg-slate-800 flex flex-col items-center justify-center border border-emerald-600/50 relative overflow-hidden">
-            <div className="text-4xl mb-1">👨‍💼</div>
-            <div className="text-[10px] text-emerald-300 font-semibold">Stock Photo #SK-44821</div>
-            <div className="text-[9px] text-slate-400">Shutterstock.com</div>
-            <div className="absolute top-1 right-1 bg-emerald-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded">ASLI</div>
+        <div className="rounded-[8px] border border-[#b9dcd9] bg-white p-2">
+          <div className="mb-2 text-center text-[10px] font-bold uppercase text-[var(--teal-deep)]">Sumber asli</div>
+          <div className="relative flex aspect-square flex-col items-center justify-center overflow-hidden rounded-[6px] border border-[#b9dcd9] bg-[var(--teal-tint)]">
+            <UserRound className="mb-1 h-9 w-9 text-[var(--teal-deep)]" />
+            <div className="text-[10px] font-semibold text-[var(--teal-deep)]">Stock Photo #SK-44821</div>
+            <div className="text-[9px] text-[var(--ink-muted)]">Shutterstock.com</div>
+            <span className="absolute right-1 top-1 rounded bg-[var(--teal-deep)] px-1.5 py-0.5 text-[8px] font-bold text-white">ASLI</span>
           </div>
         </div>
       </div>
 
-      {/* Confidence Bar */}
-      <div className="bg-slate-950 rounded-xl border border-rose-500/30 p-3 space-y-1.5">
+      <div className="space-y-1.5 rounded-[8px] border border-[var(--line)] bg-white p-3">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-slate-400 font-bold">Confidence Match</span>
-          <span className="text-rose-400 font-black text-sm">98.7%</span>
+          <span className="font-semibold text-[var(--ink-muted)]">Confidence match</span>
+          <span className="text-sm font-bold text-[var(--red-deep)]">98,7%</span>
         </div>
-        <div className="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-rose-500 to-red-400 rounded-full transition-all duration-1000" style={{ width: '98.7%' }} />
+        <div className="h-2.5 overflow-hidden rounded-full bg-[var(--mist)]">
+          <div className="h-full rounded-full bg-[var(--red)] transition-all duration-1000" style={{ width: '98.7%' }} />
         </div>
-        <div className="text-[10px] text-slate-500 text-center">Foto identik ditemukan di database stok foto komersial</div>
+        <div className="text-center text-[10px] text-[var(--ink-muted)]">
+          Foto identik ditemukan di database stok foto komersial
+        </div>
       </div>
 
-      {/* Finding */}
-      <div className="p-3 bg-rose-950/40 border border-rose-500/40 rounded-xl text-rose-200 font-bold text-xs leading-relaxed flex items-start gap-2">
-        <Eye className="w-4 h-4 mt-0.5 shrink-0 text-rose-400" />
+      <div className="flex items-start gap-2 rounded-[8px] border border-[#f0c4c4] bg-[var(--red-tint)] p-3 text-xs font-semibold leading-relaxed text-[var(--red-deep)]">
+        <Eye className="mt-0.5 h-4 w-4 shrink-0" />
         <span>{tool.finding}</span>
       </div>
     </div>
@@ -331,212 +289,198 @@ export const BrowserInvestigatorModal: React.FC<BrowserInvestigatorModalProps> =
     }
   };
 
-  // ─── Main Render ────────────────────────────────────────────────────
+  // ─── Render ────────────────────────────────────────────────────────
   return (
-    <div className="fixed inset-0 bg-slate-950/95 backdrop-blur-lg z-50 flex items-center justify-center p-2 sm:p-4">
-      {/* Screen Flash Effect */}
-      {screenFlash && (
-        <div className="fixed inset-0 z-[60] bg-white/30 pointer-events-none animate-pulse" />
-      )}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(14,22,38,0.65)] p-2 backdrop-blur-sm sm:p-4">
 
-      {/* Final Fraud Banner Overlay */}
+      {/* Banner final */}
       {showFinalBanner && (
-        <div className="fixed inset-0 z-[55] flex items-center justify-center pointer-events-none">
-          <div className="animate-in zoom-in-50 fade-in duration-500 bg-gradient-to-r from-rose-600 via-red-600 to-rose-600 border-4 border-white/30 rounded-2xl px-8 py-6 shadow-2xl shadow-rose-500/50 text-center transform -rotate-2">
-            <div className="text-white/60 text-xs font-bold uppercase tracking-widest mb-1">Hasil Investigasi</div>
-            <div className="text-white font-black text-2xl sm:text-3xl tracking-wide">
-              FRAUD SCORE: 97/100
+        <div className="pointer-events-none fixed inset-0 z-[55] flex items-center justify-center">
+          <div className="fade-slide-up rounded-[14px] border border-[var(--line-strong)] bg-[var(--white)] px-8 py-6 text-center shadow-[0_24px_70px_rgba(14,22,38,0.4)]">
+            <div className="text-xs font-bold uppercase tracking-wide text-[var(--ink-muted)]">Hasil investigasi</div>
+            <div className="mt-1 text-2xl font-bold text-[var(--ink)] sm:text-3xl">
+              Fraud score: <span className="text-[var(--red-deep)]">97/100</span>
             </div>
-            <div className="text-rose-200 font-bold text-sm mt-1 tracking-wider">
-              ✅ CONFIRMED SCAM — SITUS PENIPUAN TERVERIFIKASI
-            </div>
+            <span className="chip chip-red mt-2">
+              <CheckCircle2 size={13} /> Confirmed scam — situs penipuan terverifikasi
+            </span>
           </div>
         </div>
       )}
 
-      <div className="relative w-full max-w-6xl bg-slate-900 border-2 border-slate-700 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden flex flex-col max-h-[96vh]">
+      <div className="relative flex max-h-[96vh] w-full max-w-6xl flex-col overflow-hidden rounded-[14px] border border-[var(--line-strong)] bg-[var(--white)] shadow-[0_24px_70px_rgba(14,22,38,0.4)]">
 
-        {/* ── Browser Chrome ───────────────────────────────────── */}
-        <div className="bg-[#1e1e2e] px-4 py-2 flex items-center gap-3 border-b border-slate-800 shrink-0">
-          {/* Traffic Light Buttons */}
+        {/* Browser chrome (artefak, versi terang) */}
+        <div className="flex shrink-0 items-center gap-3 border-b border-[var(--line)] bg-[var(--mist)] px-4 py-2">
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-[#ff5f57] border border-[#e33e38] shadow-sm shadow-red-500/30" />
-            <span className="w-3 h-3 rounded-full bg-[#febc2e] border border-[#d49c11] shadow-sm shadow-yellow-500/30" />
-            <span className="w-3 h-3 rounded-full bg-[#28c840] border border-[#1faa32] shadow-sm shadow-green-500/30" />
+            <span className="h-3 w-3 rounded-full border border-[#e33e38] bg-[#ff5f57]" />
+            <span className="h-3 w-3 rounded-full border border-[#d49c11] bg-[#febc2e]" />
+            <span className="h-3 w-3 rounded-full border border-[#1faa32] bg-[#28c840]" />
           </div>
 
-          {/* Tab */}
-          <div className="bg-slate-800/80 rounded-t-lg px-4 py-1.5 text-[11px] text-slate-300 font-medium flex items-center gap-2 border border-b-0 border-slate-700 max-w-[200px] truncate">
-            <Globe className="w-3 h-3 text-slate-400 shrink-0" />
+          <div className="flex max-w-[200px] items-center gap-2 truncate rounded-t-[6px] border border-b-0 border-[var(--line)] bg-[var(--white)] px-3 py-1.5 text-[11px] font-medium text-[var(--ink-soft)]">
+            <Globe className="h-3 w-3 shrink-0 text-[var(--ink-muted)]" />
             <span className="truncate">BursaKriptoNusantara VIP</span>
           </div>
 
-          {/* Fraud Score Meter */}
-          <div className="ml-auto flex items-center gap-2">
-            <div className="flex items-center gap-2 bg-slate-950 rounded-lg px-3 py-1.5 border border-slate-700">
-              <Shield className={`w-4 h-4 ${fraudScore > 60 ? 'text-rose-400' : fraudScore > 30 ? 'text-amber-400' : 'text-slate-500'}`} />
-              <div className="flex flex-col">
-                <span className="text-[9px] text-slate-500 font-bold uppercase leading-none">Fraud Score</span>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-20 h-2 bg-slate-800 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-300 ${getFraudScoreColor()} shadow-md ${getFraudScoreGlow()}`}
-                      style={{ width: `${fraudScore}%` }}
-                    />
-                  </div>
-                  <span className={`text-xs font-black tabular-nums ${fraudScore > 60 ? 'text-rose-400' : fraudScore > 30 ? 'text-amber-400' : 'text-slate-500'}`}>
-                    {fraudScore}%
-                  </span>
+          <div className="ml-auto flex items-center gap-2 rounded-[7px] border border-[var(--line-strong)] bg-[var(--white)] px-3 py-1.5">
+            <Shield className={`h-4 w-4 ${fraudScore > 60 ? 'text-[var(--red-deep)]' : fraudScore > 30 ? 'text-[#6d5410]' : 'text-[var(--ink-muted)]'}`} />
+            <div className="flex flex-col">
+              <span className="text-[9px] font-bold uppercase leading-none text-[var(--ink-muted)]">Fraud score</span>
+              <div className="flex items-center gap-1.5">
+                <div className="h-2 w-20 overflow-hidden rounded-full bg-[var(--mist)]">
+                  <div
+                    className="h-full rounded-full transition-all duration-300"
+                    style={{ width: `${fraudScore}%`, background: fraudScore > 60 ? 'var(--red)' : '#F0C75E' }}
+                  />
                 </div>
+                <span className={`text-xs font-bold tabular-nums ${fraudScore > 60 ? 'text-[var(--red-deep)]' : 'text-[var(--ink-soft)]'}`}>
+                  {fraudScore}%
+                </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* ── URL Bar ──────────────────────────────────────────── */}
-        <div className="bg-[#16161e] px-4 py-2 flex items-center gap-2 border-b border-slate-800/50 shrink-0">
-          <div className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs font-mono flex items-center gap-2">
-            <Lock className="w-3.5 h-3.5 text-rose-500" />
-            <span className="bg-rose-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded">NOT SECURE</span>
-            <span className="text-slate-600 select-none">|</span>
-            <span className="text-amber-300/80 truncate">https://bursakriptonusantara-vip.xyz/task-vip</span>
+        {/* URL bar */}
+        <div className="flex shrink-0 items-center gap-2 border-b border-[var(--line)] bg-[var(--white)] px-4 py-2">
+          <div className="flex flex-1 items-center gap-2 rounded-[7px] border border-[var(--line)] bg-[var(--mist)] px-3 py-1.5 font-mono text-xs">
+            <Lock className="h-3.5 w-3.5 text-[var(--red-deep)]" />
+            <span className="rounded bg-[#fbebeb] px-1.5 py-0.5 text-[9px] font-bold text-[#b03535]">NOT SECURE</span>
+            <span className="select-none text-[var(--line-strong)]">|</span>
+            <span className="truncate text-[var(--red-deep)]">https://bursakriptonusantara-vip.xyz/task-vip</span>
           </div>
-          <span className="text-[10px] font-bold text-rose-400 bg-rose-950/60 px-2.5 py-1 rounded-md border border-rose-800 flex items-center gap-1 shrink-0">
-            <FileWarning className="w-3 h-3" />
+          <span className="flex shrink-0 items-center gap-1 rounded-[7px] border border-[#f0c4c4] bg-[var(--red-tint)] px-2.5 py-1 text-[10px] font-bold text-[var(--red-deep)]">
+            <FileWarning className="h-3 w-3" />
             PHISHING
           </span>
         </div>
 
-        {/* ── Content: Split View ──────────────────────────────── */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-0 overflow-hidden">
+        {/* Split view */}
+        <div className="grid flex-1 grid-cols-1 overflow-hidden lg:grid-cols-12">
 
-          {/* ══ LEFT: Fake Scam Website Mockup ══════════════════ */}
-          <div className="lg:col-span-5 overflow-y-auto bg-gradient-to-b from-[#0a0a12] to-[#0d0f1a] border-r border-slate-800">
-            <div className="p-4 space-y-3">
+          {/* KIRI: mockup situs scam (artefak garang, tapi di dalam sandbox) */}
+          <div className="overflow-y-auto border-b border-[#22304a] bg-[#14120c] lg:col-span-5 lg:border-b-0 lg:border-r">
+            <div className="space-y-3 p-4">
 
-              {/* Site Header */}
-              <div className="bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-400 rounded-xl p-3 text-center shadow-lg shadow-amber-500/20">
-                <div className="text-xs font-black text-black/60 uppercase tracking-wider">🏆 Platform #1 Indonesia</div>
-                <div className="text-lg font-black text-slate-950 leading-tight">BursaKriptoNusantara</div>
-                <div className="inline-block bg-black text-yellow-300 text-[10px] font-bold px-2 py-0.5 rounded mt-1">
-                  ⭐ VIP MEMBER AREA
-                </div>
+              {/* Site header */}
+              <div className="rounded-[10px] bg-[#F0C75E] p-3 text-center">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-[#5c4a10]">Platform #1 Indonesia</div>
+                <div className="text-lg font-extrabold leading-tight text-[#14120c]">BursaKriptoNusantara</div>
+                <span className="mt-1 inline-block rounded bg-[#14120c] px-2 py-0.5 text-[10px] font-bold text-[#F0C75E]">
+                  VIP MEMBER AREA
+                </span>
               </div>
 
-              {/* Profit Chart */}
-              <div className="bg-slate-900/80 rounded-xl border border-slate-800 p-3 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-emerald-400 flex items-center gap-1">
-                    <TrendingUp className="w-3 h-3" /> LIVE PROFIT
+              {/* Profit chart */}
+              <div className="rounded-[10px] border border-[#2a2415] bg-[#1c1912] p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="flex items-center gap-1 text-[10px] font-bold text-[#54d18a]">
+                    <TrendingUp className="h-3 w-3" /> LIVE PROFIT
                   </span>
-                  <span className="text-[10px] text-emerald-400 font-mono font-bold">+342.7%</span>
+                  <span className="font-mono text-[10px] font-bold text-[#54d18a]">+342,7%</span>
                 </div>
-                {/* Fake chart bars */}
-                <div className="flex items-end gap-1 h-16">
+                <div className="flex h-16 items-end gap-1">
                   {[35, 45, 30, 55, 65, 50, 72, 80, 68, 85, 90, 95, 88, 92, 98].map((h, i) => (
-                    <div
-                      key={i}
-                      className="flex-1 bg-gradient-to-t from-emerald-600 to-emerald-400 rounded-t-sm opacity-80"
-                      style={{ height: `${h}%` }}
-                    />
+                    <div key={i} className="flex-1 rounded-t-sm bg-[#2e8b57]" style={{ height: `${h}%` }} />
                   ))}
                 </div>
-                <div className="text-[9px] text-slate-500 text-center">Data profit member (DIPALSUKAN)</div>
+                <div className="mt-1 text-center text-[9px] text-[#8696a0]">Data profit member (DIPALSUKAN)</div>
               </div>
 
-              {/* Countdown Timer */}
-              <div className="bg-gradient-to-r from-rose-900/50 to-red-900/50 border border-rose-700/40 rounded-xl p-3 text-center space-y-1">
-                <div className="text-[10px] font-bold text-rose-300 uppercase flex items-center justify-center gap-1">
-                  <Clock className="w-3 h-3" /> Slot VIP Tersisa
+              {/* Countdown */}
+              <div className="space-y-1 rounded-[10px] border border-[#7a2f2f] bg-[#241417] p-3 text-center">
+                <div className="flex items-center justify-center gap-1 text-[10px] font-bold uppercase text-[#f2b8b5]">
+                  <Clock className="h-3 w-3" /> Slot VIP tersisa
                 </div>
-                <div className="text-2xl font-black text-white font-mono tracking-wider">
-                  {formatCountdown(countdownSeconds)}
-                </div>
-                <div className="text-[10px] text-rose-400">⚡ Hanya 3 slot lagi — DAFTAR SEKARANG!</div>
+                <div className="font-mono text-2xl font-bold tracking-wider text-white">{formatCountdown(countdownSeconds)}</div>
+                <div className="text-[10px] font-semibold text-[#f2b8b5]">Hanya 3 slot lagi — daftar sekarang!</div>
               </div>
 
-              {/* Deposit Form */}
-              <div className="bg-slate-900/80 rounded-xl border border-slate-800 p-3 space-y-2">
-                <div className="text-xs font-black text-amber-400 uppercase">💰 Deposit & Mulai Profit</div>
+              {/* Deposit form */}
+              <div className="space-y-2 rounded-[10px] border border-[#2a2415] bg-[#1c1912] p-3">
+                <div className="text-xs font-bold uppercase text-[#F0C75E]">Deposit &amp; mulai profit</div>
                 <div className="space-y-1.5">
-                  <div className="bg-slate-950 rounded-lg px-3 py-2 text-xs text-slate-500 border border-slate-700 flex items-center justify-between">
-                    <span>Jumlah Deposit</span>
-                    <span className="text-amber-300 font-bold">Rp 1.000.000</span>
+                  <div className="flex items-center justify-between rounded-[6px] border border-[#2a2415] bg-[#14120c] px-3 py-2 text-xs text-[#8696a0]">
+                    <span>Jumlah deposit</span>
+                    <span className="font-bold text-[#54d18a]">Rp 1.000.000</span>
                   </div>
-                  <div className="bg-slate-950 rounded-lg px-3 py-2 text-xs border border-slate-700">
-                    <span className="text-slate-500 text-[10px] block">Transfer ke:</span>
-                    <span className="text-amber-300 font-mono font-bold text-[11px]">Bank Digital: 7720-1123-991</span>
-                    <span className="text-slate-500 text-[10px] block">a.n Ahmad Penampung</span>
+                  <div className="rounded-[6px] border border-[#2a2415] bg-[#14120c] px-3 py-2">
+                    <span className="block text-[10px] text-[#8696a0]">Transfer ke:</span>
+                    <span className="block font-mono text-[11px] font-bold text-[#54d18a]">Bank Digital: 7720-1123-991</span>
+                    <span className="block text-[10px] text-[#8696a0]">a.n Ahmad Penampung</span>
                   </div>
-                  <div className="bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-black text-xs py-2 rounded-lg text-center cursor-not-allowed opacity-75">
-                    DEPOSIT SEKARANG →
+                  <div className="cursor-not-allowed rounded-[6px] bg-[#F0C75E] py-2 text-center text-xs font-extrabold text-[#14120c] opacity-80">
+                    DEPOSIT SEKARANG &rarr;
                   </div>
                 </div>
               </div>
 
-              {/* Fake Testimonials */}
-              <div className="bg-slate-900/80 rounded-xl border border-slate-800 p-3 space-y-2">
-                <div className="text-xs font-bold text-slate-300 flex items-center gap-1">
-                  <Users className="w-3 h-3 text-cyan-400" /> Testimoni Member VIP
+              {/* Testimoni */}
+              <div className="space-y-2 rounded-[10px] border border-[#2a2415] bg-[#1c1912] p-3">
+                <div className="flex items-center gap-1 text-xs font-bold text-[#d1d7e0]">
+                  <Users className="h-3 w-3 text-[#F0C75E]" /> Testimoni member VIP
                 </div>
                 {[
-                  { name: 'A***i', text: 'Sudah profit Rp 15jt dalam 1 minggu!! 🔥', stars: 5 },
-                  { name: 'D***a', text: 'Awalnya ragu, ternyata beneran cair!', stars: 5 },
-                  { name: 'M***n', text: 'Platform terpercaya, CS ramah 24/7 👍', stars: 5 },
+                  { name: 'A***i', text: 'Sudah profit Rp 15jt dalam 1 minggu!!' },
+                  { name: 'D***a', text: 'Awalnya ragu, ternyata beneran cair!' },
+                  { name: 'M***n', text: 'Platform terpercaya, CS ramah 24/7' },
                 ].map((t, i) => (
-                  <div key={i} className="bg-slate-950/60 rounded-lg p-2 space-y-0.5">
+                  <div key={i} className="space-y-0.5 rounded-[6px] bg-[#14120c] p-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-slate-300">{t.name}</span>
+                      <span className="text-[10px] font-bold text-[#d1d7e0]">{t.name}</span>
                       <div className="flex gap-0.5">
-                        {Array.from({ length: t.stars }).map((_, j) => (
-                          <Star key={j} className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
+                        {Array.from({ length: 5 }).map((_, j) => (
+                          <Star key={j} className="h-2.5 w-2.5 fill-[#F0C75E] text-[#F0C75E]" />
                         ))}
                       </div>
                     </div>
-                    <div className="text-[10px] text-slate-400">{t.text}</div>
+                    <div className="text-[10px] text-[#8696a0]">{t.text}</div>
                   </div>
                 ))}
-                <div className="text-[9px] text-red-400/60 text-center italic">(Semua testimoni di atas adalah PALSU)</div>
+                <div className="text-center text-[9px] italic text-[#f2b8b5]">(Semua testimoni di atas adalah PALSU)</div>
               </div>
 
-              {/* Fake Founder Profile */}
-              <div className="bg-slate-900/80 rounded-xl border border-slate-800 p-3 flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center text-xl shrink-0 shadow-md shadow-amber-500/20">
-                  👨‍💼
-                </div>
+              {/* Founder */}
+              <div className="flex items-center gap-3 rounded-[10px] border border-[#2a2415] bg-[#1c1912] p-3">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#F0C75E]">
+                  <UserRound className="h-6 w-6 text-[#14120c]" />
+                </span>
                 <div>
-                  <div className="text-xs font-bold text-white flex items-center gap-1">
+                  <div className="flex items-center gap-1 text-xs font-bold text-white">
                     Dr. Hendra Wijaya
-                    <CheckCircle2 className="w-3 h-3 text-blue-400" />
+                    <CheckCircle2 className="h-3 w-3 text-[#4dd0c7]" />
                   </div>
-                  <div className="text-[10px] text-slate-400">Founder & CEO — "Analis Kripto Terverifikasi OJK"</div>
-                  <div className="text-[9px] text-rose-500 font-bold">(Identitas & Klaim = PALSU)</div>
+                  <div className="text-[10px] text-[#8696a0]">
+                    Founder &amp; CEO — &quot;Analis Kripto Terverifikasi OJK&quot;
+                  </div>
+                  <div className="text-[9px] font-bold text-[#f2b8b5]">(Identitas &amp; klaim = PALSU)</div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* ══ RIGHT: Forensic Analysis Dashboard ═════════════ */}
-          <div className="lg:col-span-7 overflow-y-auto bg-slate-950/50">
-            <div className="p-4 space-y-4">
+          {/* KANAN: dashboard forensik (terang) */}
+          <div className="overflow-y-auto bg-[var(--mist)] lg:col-span-7">
+            <div className="space-y-4 p-4">
 
-              {/* Dashboard Header */}
+              {/* Dashboard header */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-md shadow-cyan-500/30">
-                    <ScanLine className="w-5 h-5 text-white" />
-                  </div>
+                  <span className="icon-tile !h-8 !w-8">
+                    <ScanLine className="h-4.5 w-4.5" />
+                  </span>
                   <div>
-                    <div className="text-xs font-black text-white uppercase tracking-wider">CyberForensik Dashboard</div>
-                    <div className="text-[10px] text-slate-500">Analisis situs mencurigakan</div>
+                    <div className="text-xs font-bold text-[var(--ink)]">CyberForensik Dashboard</div>
+                    <div className="text-[10px] text-[var(--ink-muted)]">Analisis situs mencurigakan</div>
                   </div>
                 </div>
-                <div className="bg-slate-900 text-cyan-400 px-3 py-1.5 rounded-lg font-mono text-xs font-bold border border-cyan-500/30">
-                  {analyzedCount}/3 Selesai
-                </div>
+                <span className={`chip font-mono ${analyzedCount === 3 ? 'chip-teal' : ''}`}>
+                  {analyzedCount}/3 selesai
+                </span>
               </div>
 
-              {/* ── Tool Cards Grid ────────────────────────────── */}
+              {/* Tool cards */}
               <div className="grid grid-cols-3 gap-2">
                 {toolList.map((tool) => {
                   const isScanning = scanningToolId === tool.toolId;
@@ -548,47 +492,42 @@ export const BrowserInvestigatorModal: React.FC<BrowserInvestigatorModalProps> =
                       key={tool.toolId}
                       onClick={() => handleRunTool(tool.toolId)}
                       disabled={isScanning}
-                      className={`relative p-3 rounded-xl border-2 font-bold text-xs flex flex-col items-center gap-2 transition-all duration-300 group overflow-hidden ${
+                      className={`relative flex flex-col items-center gap-2 overflow-hidden rounded-[10px] border p-3 text-xs font-bold transition-all duration-300 ${
                         isSelected
-                          ? 'border-cyan-400 bg-cyan-950/40 text-cyan-200 shadow-lg shadow-cyan-500/20 scale-[1.02]'
+                          ? 'border-[var(--teal-deep)] bg-white text-[var(--teal-deep)] ring-1 ring-[var(--teal-deep)]'
                           : isDone
-                            ? 'border-emerald-600/50 bg-emerald-950/20 text-emerald-300'
-                            : 'border-slate-700 bg-slate-900/80 text-slate-400 hover:border-slate-500 hover:bg-slate-800/80'
+                          ? 'border-[#b9dcd9] bg-[var(--teal-tint)] text-[var(--teal-deep)]'
+                          : 'border-[var(--line-strong)] bg-white text-[var(--ink-soft)] hover:border-[var(--ink)]'
                       }`}
                     >
-                      {/* Gradient overlay on hover */}
-                      <div className={`absolute inset-0 bg-gradient-to-br ${toolColors[tool.toolId]} opacity-0 group-hover:opacity-5 transition-opacity rounded-xl`} />
-
-                      {/* Icon */}
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br ${toolColors[tool.toolId]} ${isDone ? 'opacity-100' : 'opacity-60 group-hover:opacity-80'} transition-opacity shadow-md`}>
-                        <div className="text-white">{toolIcons[tool.toolId]}</div>
-                      </div>
-
-                      {/* Name */}
-                      <span className="text-[11px] font-bold truncate w-full text-center relative z-10">
-                        {tool.name}
+                      <span
+                        className={`flex h-10 w-10 items-center justify-center rounded-[8px] ${
+                          isDone ? 'bg-[var(--teal-deep)] text-white' : 'bg-[var(--mist)] text-[var(--ink-soft)]'
+                        }`}
+                      >
+                        {toolIcons[tool.toolId]}
                       </span>
 
-                      {/* Status Badge */}
+                      <span className="w-full truncate text-center text-[11px]">{tool.name}</span>
+
                       {isDone ? (
-                        <span className="text-[9px] bg-emerald-500 text-slate-950 px-2 py-0.5 rounded-full font-black flex items-center gap-0.5">
-                          <CheckCircle2 className="w-2.5 h-2.5" /> SELESAI
+                        <span className="flex items-center gap-0.5 rounded-full bg-[var(--teal-deep)] px-2 py-0.5 text-[9px] font-bold text-white">
+                          <CheckCircle2 className="h-2.5 w-2.5" /> SELESAI
                         </span>
                       ) : isScanning ? (
-                        <span className="text-[9px] bg-cyan-500 text-slate-950 px-2 py-0.5 rounded-full font-black animate-pulse">
+                        <span className="rounded-full bg-[#ecd9a3] px-2 py-0.5 text-[9px] font-bold text-[#6d5410]">
                           SCANNING...
                         </span>
                       ) : (
-                        <span className="text-[9px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded-full font-bold">
+                        <span className="rounded-full bg-[var(--mist)] px-2 py-0.5 text-[9px] font-bold text-[var(--ink-muted)]">
                           Klik untuk scan
                         </span>
                       )}
 
-                      {/* Scanning Progress Bar (overlaid at bottom) */}
                       {isScanning && (
-                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-800 overflow-hidden rounded-b-xl">
+                        <div className="absolute bottom-0 left-0 right-0 h-1 overflow-hidden bg-[var(--line)]">
                           <div
-                            className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-100 ease-linear"
+                            className="h-full bg-[var(--teal)] transition-all duration-100 ease-linear"
                             style={{ width: `${scanProgress}%` }}
                           />
                         </div>
@@ -598,81 +537,76 @@ export const BrowserInvestigatorModal: React.FC<BrowserInvestigatorModalProps> =
                 })}
               </div>
 
-              {/* ── Scanning Animation Panel ───────────────────── */}
+              {/* Scanning panel */}
               {scanningToolId && (
-                <div className="bg-slate-900 border-2 border-cyan-500/30 rounded-2xl p-5 space-y-3 shadow-lg shadow-cyan-500/10">
+                <div className="card space-y-3 p-5">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" />
+                    <div className="h-7 w-7 animate-spin rounded-full border-2 border-[var(--teal-deep)] border-t-transparent" />
                     <div>
-                      <div className="text-xs font-bold text-cyan-300 uppercase">
+                      <div className="text-xs font-bold text-[var(--teal-deep)]">
                         Memindai {toolList.find((t) => t.toolId === scanningToolId)?.name}...
                       </div>
-                      <div className="text-[10px] text-slate-500">Menganalisis data forensik digital</div>
+                      <div className="text-[10px] text-[var(--ink-muted)]">Menganalisis data forensik digital</div>
                     </div>
                   </div>
 
-                  {/* Main Progress Bar */}
                   <div className="space-y-1">
-                    <div className="w-full h-3 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                    <div className="h-3 overflow-hidden rounded-full border border-[var(--line)] bg-[var(--mist)]">
                       <div
-                        className="h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-cyan-400 rounded-full transition-all duration-100 ease-linear relative"
-                        style={{ width: `${scanProgress}%` }}
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
-                      </div>
+                        className="h-full rounded-full transition-all duration-100 ease-linear"
+                        style={{ width: `${scanProgress}%`, background: 'var(--teal)' }}
+                      />
                     </div>
                     <div className="flex items-center justify-between text-[10px]">
-                      <span className="text-slate-500 font-mono">Scanning database...</span>
-                      <span className="text-cyan-400 font-bold font-mono">{Math.round(scanProgress)}%</span>
+                      <span className="font-mono text-[var(--ink-muted)]">Scanning database...</span>
+                      <span className="font-mono font-bold text-[var(--teal-deep)]">{Math.round(scanProgress)}%</span>
                     </div>
                   </div>
 
-                  {/* Scrolling Scan Lines */}
-                  <div className="bg-slate-950 rounded-lg p-2 font-mono text-[9px] text-slate-600 space-y-0.5 h-12 overflow-hidden">
-                    <div className="animate-pulse space-y-0.5">
-                      <div>→ Connecting to threat intelligence DB...</div>
-                      <div>→ Cross-referencing domain registry...</div>
-                      <div>→ Analyzing SSL certificates...</div>
-                      <div>→ Checking blacklist databases...</div>
-                    </div>
+                  <div className="h-12 overflow-hidden rounded-[6px] bg-[var(--mist)] p-2 font-mono text-[9px] leading-4 text-[var(--ink-muted)]">
+                    <div>&rarr; Connecting to threat intelligence DB...</div>
+                    <div>&rarr; Cross-referencing domain registry...</div>
+                    <div>&rarr; Analyzing SSL certificates...</div>
+                    <div>&rarr; Checking blacklist databases...</div>
                   </div>
                 </div>
               )}
 
-              {/* ── Result Panel ───────────────────────────────── */}
+              {/* Result panel */}
               {revealedToolId && !scanningToolId && (
-                <div className="bg-slate-900 border-2 border-slate-700 rounded-2xl p-4 space-y-3 shadow-xl">
-                  {/* Result Header */}
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                <div className="card space-y-3 p-4">
+                  <div className="flex items-center justify-between border-b border-[var(--line)] pb-2">
                     <div className="flex items-center gap-2">
-                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center bg-gradient-to-br ${toolColors[revealedToolId]}`}>
-                        <div className="text-white scale-75">{toolIcons[revealedToolId]}</div>
-                      </div>
-                      <span className="text-xs font-bold text-white uppercase tracking-wide">
+                      <span className="grid h-6 w-6 place-items-center rounded-[6px] bg-[var(--mist)] text-[var(--ink-soft)]">
+                        {toolIcons[revealedToolId]}
+                      </span>
+                      <span className="text-xs font-bold uppercase tracking-wide text-[var(--ink)]">
                         {toolList.find((t) => t.toolId === revealedToolId)?.name}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5 bg-rose-600/20 border border-rose-500/40 rounded-lg px-2.5 py-1">
-                      <Zap className="w-3 h-3 text-rose-400" />
-                      <span className="text-[10px] text-rose-300 font-black uppercase">Temuan Kritis</span>
-                    </div>
+                    <span className="chip chip-red">
+                      <Zap size={12} /> Temuan kritis
+                    </span>
                   </div>
 
-                  {/* Detailed Results */}
                   {renderToolResult(revealedToolId)}
                 </div>
               )}
 
-              {/* ── Empty State (no tool selected yet) ─────────── */}
+              {/* Empty state */}
               {!selectedToolId && !scanningToolId && (
-                <div className="bg-slate-900/50 border-2 border-dashed border-slate-700 rounded-2xl p-8 text-center space-y-2">
-                  <Search className="w-8 h-8 text-slate-600 mx-auto" />
-                  <div className="text-xs font-bold text-slate-500">Pilih alat forensik di atas untuk memulai investigasi</div>
-                  <div className="text-[10px] text-slate-600">Jalankan ketiga alat untuk mengungkap penipuan</div>
+                <div className="rounded-[10px] border border-dashed border-[var(--line-strong)] bg-white p-8 text-center">
+                  <Search className="mx-auto h-7 w-7 text-[var(--ink-muted)]" />
+                  <div className="mt-2 text-xs font-bold text-[var(--ink-soft)]">
+                    Pilih alat forensik di atas untuk memulai investigasi
+                  </div>
+                  <div className="mt-1 text-[10px] text-[var(--ink-muted)]">
+                    Jalankan ketiga alat untuk mengungkap penipuan
+                  </div>
                 </div>
               )}
 
-              {/* ── Complete Investigation Button ──────────────── */}
+              {/* Complete button */}
               <button
                 onClick={() => {
                   if (isAllAnalyzed) {
@@ -683,16 +617,12 @@ export const BrowserInvestigatorModal: React.FC<BrowserInvestigatorModalProps> =
                   }
                 }}
                 disabled={!isAllAnalyzed}
-                className={`w-full py-3.5 px-4 rounded-xl font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 border-2 transition-all duration-300 ${
-                  isAllAnalyzed
-                    ? 'bg-gradient-to-r from-cyan-400 via-blue-500 to-cyan-400 hover:from-cyan-300 hover:via-blue-400 hover:to-cyan-300 text-slate-950 border-cyan-300 shadow-lg shadow-cyan-500/30 active:scale-95 hover:shadow-xl hover:shadow-cyan-500/40'
-                    : 'bg-slate-800 text-slate-500 cursor-not-allowed border-slate-700'
-                }`}
+                className="btn btn-primary btn-block justify-center"
               >
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="h-4 w-4" />
                 {isAllAnalyzed
-                  ? 'BONGKAR JEBAKAN & SADARKAN RIAN!'
-                  : `Jalankan Semua Forensik (${analyzedCount}/3 Selesai)`}
+                  ? 'Bongkar jebakan & sadarkan Rian!'
+                  : `Jalankan semua forensik (${analyzedCount}/3 selesai)`}
               </button>
             </div>
           </div>
