@@ -5,6 +5,7 @@ import confetti from 'canvas-confetti';
 import { ArrowRight, RotateCcw } from 'lucide-react';
 import { Mascot } from '../../../components/Mascot';
 import { SiteFrame } from '../../../components/SiteChrome';
+import { LessonSummaryDialog } from '../../../components/LessonSummaryDialog';
 import { getCaseById } from '../../../data/cases';
 
 export default function Results({ params }: { params: Promise<{ id: string }> }) {
@@ -58,6 +59,7 @@ export default function Results({ params }: { params: Promise<{ id: string }> })
         </p>
 
         <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <LessonSummaryDialog caseTitle={item.title} skills={item.skills} />
           <Link href={`/main/${id}`} className="btn btn-secondary">
             <RotateCcw size={16} /> Ulangi kasus
           </Link>

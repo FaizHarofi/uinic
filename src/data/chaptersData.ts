@@ -440,3 +440,92 @@ export const CHAPTER_3_DIALOGUES: Record<string, DialogueNode> = {
     autoNext: 'trigger_victory',
   },
 };
+
+export const CHAPTER_4_DIALOGUES: Record<string, DialogueNode> = {
+  intro: {
+    id: 'intro',
+    speaker: 'Sari (Teman Kelas)',
+    speakerRole: 'Relawan komunitas',
+    text: 'Aku mau bantu korban banjir, tapi unggahan ini bilang donasi harus masuk malam ini juga. Ada foto posko dan nomor rekening pribadi. Bisa kita cek dulu?',
+    expression: 'worried',
+    choices: [
+      {
+        id: 'c_verify',
+        label: 'Kita periksa identitas penggalang dan kanal resminya dulu.',
+        type: 'action',
+        actionPrompt: 'Verifikasi Penggalang Dana',
+        nextStepId: 'verify_fundraiser',
+      },
+      {
+        id: 'c_share',
+        label: 'Sebarkan sekarang supaya lebih banyak yang ikut membantu.',
+        type: 'risky',
+        actionPrompt: 'Sebarkan Ajakan Donasi',
+        triggerEmergency: true,
+      },
+      {
+        id: 'c_ask_source',
+        label: 'Tanya siapa lembaga yang mengelola donasi ini.',
+        type: 'action',
+        actionPrompt: 'Tanyakan Sumber Donasi',
+        nextStepId: 'ask_source',
+      },
+    ],
+  },
+  ask_source: {
+    id: 'ask_source',
+    speaker: 'Sari (Teman Kelas)',
+    speakerRole: 'Relawan komunitas',
+    text: 'Adminnya menjawab, "Yang penting bantu dulu. Jangan banyak tanya, nanti keburu ditutup." Jawaban itu malah membuatku ragu.',
+    expression: 'thinking',
+    choices: [
+      {
+        id: 'c_check_again',
+        label: 'Jangan kirim atau sebarkan dulu. Cari posko dan rekening dari kanal resmi.',
+        type: 'action',
+        actionPrompt: 'Cari Kanal Resmi',
+        nextStepId: 'verify_fundraiser',
+      },
+    ],
+  },
+  verify_fundraiser: {
+    id: 'verify_fundraiser',
+    speaker: 'Budi (Kamu)',
+    speakerRole: 'Detektif Siber Pemula',
+    text: 'Kita menemukan unggahan asli dari organisasi kemanusiaan. Nomor rekening dan tautannya berbeda, sedangkan unggahan tadi memakai foto lama tanpa alamat posko yang bisa dicek.',
+    expression: 'thinking',
+    choices: [
+      {
+        id: 'c_safe_help',
+        label: 'Donasi lewat kanal resmi dan laporkan unggahan yang menyesatkan.',
+        type: 'action',
+        actionPrompt: 'Pilih Jalur Bantuan Aman',
+        nextStepId: 'case_resolution_4',
+      },
+    ],
+  },
+  case_resolution_4: {
+    id: 'case_resolution_4',
+    speaker: 'Sari (Teman Kelas)',
+    speakerRole: 'Relawan komunitas',
+    text: 'Bantuan tetap tersalurkan, tetapi lewat penggalang yang bisa diverifikasi. Kita juga tidak ikut menyebarkan informasi yang belum jelas.',
+    expression: 'relieved',
+    autoNext: 'trigger_victory',
+  },
+  after_emergency_4: {
+    id: 'after_emergency_4',
+    speaker: 'Budi (Kamu)',
+    speakerRole: 'Detektif Siber Pemula',
+    text: 'Niat membantu itu penting, tetapi unggahan yang belum terverifikasi bisa merugikan korban dan orang yang berdonasi. Mari berhenti, hapus unggahan dari daftar bagikan, lalu cari kanal bantuan resmi.',
+    expression: 'thinking',
+    choices: [
+      {
+        id: 'c_recover',
+        label: 'Cari kanal resmi dan bantu sebarkan informasi yang sudah terverifikasi.',
+        type: 'action',
+        actionPrompt: 'Pulihkan Keputusan',
+        nextStepId: 'verify_fundraiser',
+      },
+    ],
+  },
+};

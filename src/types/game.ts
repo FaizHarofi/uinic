@@ -1,4 +1,4 @@
-export type GameChapter = 1 | 2 | 3;
+export type GameChapter = 1 | 2 | 3 | 4;
 
 export type GamePhase = 
   | 'title'           // Halaman Depan / Cover Komik

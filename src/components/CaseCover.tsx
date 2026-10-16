@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react';
 import { GameChapter } from '../types/game';
-import { FileText, Package, PhoneCall, Lock, TrendingUp, ShieldAlert } from 'lucide-react';
+import { FileText, Package, PhoneCall, Lock, TrendingUp, ShieldAlert, HeartHandshake } from 'lucide-react';
 
 /* Sampul kasus = potongan bukti digital yang otentik, digambar dengan HTML/CSS.
    Bukan ilustrasi dekoratif: ini adalah bahan yang akan diperiksa pemain. */
@@ -107,10 +107,39 @@ function BrowserScene() {
   );
 }
 
+function DonationScene() {
+  return (
+    <div className="absolute inset-0 flex flex-col overflow-hidden bg-white text-left">
+      <div className="border-b border-[#dce2ea] bg-[#f3f5f8] px-3 py-2">
+        <p className="text-[0.58rem] font-bold text-[#17243a] sm:text-[0.7rem]">Linimasa Komunitas</p>
+        <p className="font-mono text-[0.5rem] text-[#56647c] sm:text-[0.6rem]">unggahan bantuan · baru saja</p>
+      </div>
+      <div className="flex flex-1 flex-col justify-center gap-2.5 bg-[#f3f5f8] p-3 sm:p-5">
+        <div className="rounded-md border border-[#dce2ea] bg-white p-3 shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="grid h-7 w-7 place-items-center rounded-full bg-[#fbf2da] text-[#6d5410]"><HeartHandshake size={14} /></span>
+            <div>
+              <p className="text-[0.62rem] font-bold text-[#17243a] sm:text-[0.75rem]">Bantu Korban Banjir Sekarang</p>
+              <p className="text-[0.5rem] text-[#56647c] sm:text-[0.58rem]">Akun bantuan komunitas</p>
+            </div>
+          </div>
+          <p className="mt-2 text-[0.58rem] leading-relaxed text-[#33415c] sm:text-[0.7rem]">Donasi ditutup malam ini. Transfer ke rekening pribadi dan bantu sebarkan.</p>
+          <div className="mt-2 flex items-center justify-between rounded-sm bg-[#fbebeb] px-2 py-1.5">
+            <span className="font-mono text-[0.5rem] text-[#b03535] sm:text-[0.6rem]">a.n. R*** S***</span>
+            <ShieldAlert size={12} className="text-[#b03535]" />
+          </div>
+        </div>
+        <p className="text-center font-mono text-[0.5rem] text-[#56647c] sm:text-[0.6rem]">Periksa sebelum membagikan.</p>
+      </div>
+    </div>
+  );
+}
+
 const SCENES: Record<GameChapter, ComponentType> = {
   1: ChatScene,
   2: CallScene,
   3: BrowserScene,
+  4: DonationScene,
 };
 
 export function CaseCover({ id, className = '' }: { id: GameChapter; className?: string }) {

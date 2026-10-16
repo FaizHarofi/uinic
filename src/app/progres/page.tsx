@@ -19,6 +19,13 @@ export default function Progress() {
 
   const finished = done ?? [];
   const next = CASES.find((item) => !finished.includes(item.id));
+  const skills = Array.from(
+    new Map(
+      CASES.flatMap((item) =>
+        item.skills.map((skill) => [skill, { skill, caseId: item.id, caseTitle: item.title }] as const),
+      ),
+    ).values(),
+  );
 
   return (
     <SiteFrame>
@@ -59,6 +66,47 @@ export default function Progress() {
               </p>
             )}
           </div>
+        )}
+
+        {done !== null && (
+          <section className="mt-12 border-t border-[var(--line-strong)] pt-8" aria-labelledby="skills-heading">
+            <div className="max-w-[58ch]">
+              <p className="font-mono text-[0.74rem] font-semibold text-[var(--teal-deep)]">Peta kemampuan</p>
+              <h2 id="skills-heading" className="mt-1 text-[1.65rem]">
+                Yang sedang kamu latih
+              </h2>
+              <p className="mt-2 text-[0.94rem] leading-6 text-[var(--ink-muted)]">
+                Setiap kasus membuka latihan yang berbeda. Selesaikan kasus terkait untuk menandai kemampuan ini sebagai sudah dipraktikkan.
+              </p>
+            </div>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              {skills.map(({ skill, caseId, caseTitle }) => {
+                const practiced = finished.includes(caseId);
+                const caseItem = CASES.find((item) => item.id === caseId);
+                return (
+                  <Link
+                    key={skill}
+                    href={caseItem ? `/kasus/${caseItem.slug}` : '/kasus'}
+                    className="card card-hover group flex min-h-[112px] flex-col justify-between p-4"
+                  >
+                    <div>
+                      <p className="font-semibold text-[var(--ink)]">{skill}</p>
+                      <p className="mt-1 text-[0.8rem] text-[var(--ink-muted)]">{caseTitle}</p>
+                    </div>
+                    <span
+                      className={`mt-3 flex items-center gap-1.5 text-[0.8rem] font-bold ${
+                        practiced ? 'text-[var(--teal-deep)]' : 'text-[var(--ink-muted)] group-hover:text-[var(--ink)]'
+                      }`}
+                    >
+                      {practiced ? <Check size={14} strokeWidth={3} aria-hidden="true" /> : null}
+                      {practiced ? 'Sudah dipraktikkan' : 'Mulai latihan'}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
         )}
 
         {done !== null && (

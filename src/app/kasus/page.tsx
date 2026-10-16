@@ -16,7 +16,7 @@ export default function CasesPage() {
       <section className="mx-auto max-w-4xl px-5 py-10 lg:px-8 lg:py-14">
         <h1 className="text-[clamp(2rem,4vw,2.8rem)]">Berkas kasus</h1>
         <p className="mt-3 max-w-[54ch] text-[1.02rem] leading-7 text-[var(--ink-muted)]">
-          Tiga situasi penipuan. Pilih satu dan mulai saat kamu siap.
+          Empat situasi penipuan. Pilih satu dan mulai saat kamu siap.
         </p>
 
         <div className="mt-8 flex gap-6 border-b border-[var(--line-strong)]">
